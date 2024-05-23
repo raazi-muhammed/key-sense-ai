@@ -14,7 +14,7 @@ export async function POST(request: Request) {
         model: "gemini-pro",
     });
 
-    const prompt = `tell me about ${data.topic}, there should not be any formatting`;
+    const prompt = `tell me about ${data.topic}, there should not be any formatting, and it should about 50 words`;
 
     const result = await model.generateContent(prompt);
     const text = result.response.text();

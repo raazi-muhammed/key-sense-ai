@@ -1,21 +1,28 @@
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "../ui/button";
+import { Input } from "../ui/input";
 
 function msToTime(milliseconds: number) {
-    // Calculate minutes and seconds from milliseconds
     const minutes = Math.floor(milliseconds / (1000 * 60));
     const seconds = Math.floor((milliseconds % (1000 * 60)) / 1000);
 
-    // Ensure double-digit formatting for minutes and seconds (leading zero if necessary)
     const formattedMinutes = minutes.toString().padStart(2, "0");
     const formattedSeconds = seconds.toString().padStart(2, "0");
 
     return `${formattedMinutes}:${formattedSeconds}`;
 }
 
-export default function TopBar({ timer }: { timer: number }) {
+export default function TopBar({
+    timer,
+    generateTestFromTopic,
+}: {
+    timer: number;
+    generateTestFromTopic: (params: { topic: string }) => void;
+}) {
+    const [topic, setTopic] = useState("Roman empire");
+
     return (
-        <section className="min-h-72 bg-muted/50 flex flex-col justify-between py-8">
+        <section className="h-[30svh] bg-accent flex flex-col justify-between py-8">
             <section className="flex justify-center">
                 <Button>mode</Button>
             </section>
@@ -24,7 +31,17 @@ export default function TopBar({ timer }: { timer: number }) {
                     <small className="text-base bg-card block w-fit px-3 py-1 rounded-full border">
                         Topic
                     </small>
-                    <p className="text-xl underline font-mono">Roman empire</p>
+                    <div className="flex">
+                        <Input
+                            className="text-xl underline font-mono w-fit bg-accent border-none focus-visible:ring-none focus-visible:outline-none focus-visible:border-none focus-visible:ring-2-none"
+                            value={topic}
+                            onChange={(e) => setTopic(e.target.value)}
+                        />
+                        <Button
+                            onClick={() => generateTestFromTopic({ topic })}>
+                            Generate
+                        </Button>
+                    </div>
                 </section>
                 <section>
                     <small className="text-base bg-card block w-fit px-3 py-1 rounded-full border ms-auto">

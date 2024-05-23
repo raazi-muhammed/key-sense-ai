@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import TopBar from "@/components/custom/TopBar";
 import { Button } from "@/components/ui/button";
 import axios from "axios";
+import { Skeleton } from "@/components/ui/skeleton";
+import Key from "@/components/custom/Key";
 
 export default function Home() {
     const [words, setWords] = useState("");
@@ -14,13 +16,36 @@ export default function Home() {
     const timerInterval = useRef<any>(null);
     const [missedLetters, setMissedLetters] = useState<string[]>([]);
     const [timer, setTimer] = useState(0);
+    const [loading, setLoading] = useState(false);
+    const divRef = useRef<any>();
+
+    function scrollIntoView() {
+        const { current } = divRef;
+
+        if (current !== null) {
+            current.scrollIntoView({
+                behavior: "smooth",
+            });
+        }
+    }
+
+    function generateTestFromTopic({ topic }: { topic: string }) {
+        if (loading) {
+            toast("Already generating content");
+            return;
+        }
+        setLoading(true);
+        axios
+            .post("/api/type", { topic })
+            .then((res) => {
+                setWords(res.data.response);
+                setUserTyped("");
+            })
+            .finally(() => setLoading(false));
+    }
 
     useEffect(() => {
         generateWords();
-        /* axios.post("/api/type", { topic: "React" }).then((res) => {
-            console.log(res.data);
-            setWords(res.data.response);
-        }); */
     }, []);
 
     useEffect(() => {
@@ -41,32 +66,30 @@ export default function Home() {
                 100
             );
         }
-        console.log(s);
         const characterTyped = s.key;
         const characterTypedCode = characterTyped.charCodeAt(0);
 
+        scrollIntoView();
         setUserTyped((ut) => {
             const lastLetterCode = words.charCodeAt(ut.length);
 
             if (characterTyped == "Backspace") {
                 return ut.substring(0, ut.length - 1);
             }
+
+            if (characterTyped == "Enter" && lastLetterCode == 10) {
+                return ut + String.fromCharCode(10);
+            }
+
             if (characterTyped.length > 1) return ut;
 
             if (characterTypedCode != lastLetterCode) {
-                if (characterTypedCode == 32 && lastLetterCode == 10) {
-                    return ut + characterTyped;
-                }
-
                 toast("not same");
                 setMissedLetters((ml) => [...ml, words.charAt(ut.length)]);
                 return ut;
             }
             if (ut.length + 1 === words.length) {
-                console.log("inverval cleared");
-
                 isRunning.current = false;
-                console.log(interval);
 
                 if (timerInterval.current) clearInterval(timerInterval.current);
             }
@@ -75,16 +98,19 @@ export default function Home() {
     }
 
     function generateWords() {
-        const words = faker.lorem.lines(1);
+        const words = faker.lorem.lines(15);
         setWords(words);
     }
 
     return (
         <main>
-            <TopBar timer={timer} />
+            <TopBar
+                generateTestFromTopic={generateTestFromTopic}
+                timer={timer}
+            />
 
             <section>
-                <div className="relative max-w-[80ch] mx-auto mt-16">
+                <div className="relative max-w-[80ch] mx-auto">
                     {words.length === userTyped.length ? (
                         <section>
                             <div className="grid gap-4 grid-cols-3">
@@ -117,18 +143,34 @@ export default function Home() {
                                 </Button>
                             </section>
                         </section>
+                    ) : loading ? (
+                        <div className="flex flex-col space-y-3 py-16">
+                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
+                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
+                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
+                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
+                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
+                        </div>
                     ) : (
-                        <>
-                            <p className="text-3xl font-mono left-0 opacity-50 break-all leading-relaxed">
-                                {words}
-                            </p>
-                            <p className="text-3xl text-white font-mono absolute inset-0 break-all leading-relaxed">
-                                {userTyped}
-                                <span className="-ms-2 animate-pulse duration-400">
-                                    |
-                                </span>
-                            </p>
-                        </>
+                        <section className="overflow-y-scroll h-[50svh] py-16">
+                            <div className="relative">
+                                <p className="text-3xl font-mono opacity-50 flex flex-wrap">
+                                    {words.split("").map((key) => (
+                                        <Key code={key.charCodeAt(0)} />
+                                    ))}
+                                </p>
+                                <p className="text-3xl text-white font-mono absolute inset-0 flex flex-wrap h-fit">
+                                    {userTyped.split("").map((key) => (
+                                        <Key code={key.charCodeAt(0)} />
+                                    ))}
+                                    <span
+                                        ref={divRef}
+                                        className="-ms-2 animate-pulse duration-400">
+                                        |
+                                    </span>
+                                </p>
+                            </div>
+                        </section>
                     )}
                 </div>
             </section>
