@@ -71,11 +71,11 @@ export default function Result({
     return (
         <section className="grid gap-4">
             <section className="grid grid-cols-3 gap-4">
+                <Card heading="Typing speed" content={report.typingSpeed} />
                 <Card
-                    heading="Typing speed"
-                    content={numberOfCharactersTyped}
+                    heading="Typing accuracy"
+                    content={report.typingAccuracy}
                 />
-                <Card heading="Typing accuracy" content={report.typingSpeed} />
                 <Card
                     heading="Time taken"
                     content={report.timeTakenInSeconds}
@@ -84,21 +84,28 @@ export default function Result({
             <Separator />
             <section className="grid grid-cols-2 gap-4">
                 <LongCard
-                    heading="Time taken"
-                    content={report.timeTakenInSeconds}
+                    heading="Characters typed"
+                    content={report.numberOfCharactersTyped}
                 />
                 <LongCard
-                    heading="Time taken"
-                    content={report.timeTakenInSeconds}
+                    heading="Characters missed"
+                    content={report.numberOfCharactersMissed}
                 />
             </section>
-            <Separator />
-            <p>Missed letters</p>
-            <section className="grid grid-cols-3 gap-4 rounded bg-secondary p-4">
-                {report.missedCharacters.map((letter) => (
-                    <LongCard heading={letter.letter} content={letter.count} />
-                ))}
-            </section>
+            {report.numberOfCharactersMissed > 0 ? (
+                <>
+                    <Separator />
+                    <p>Missed letters</p>
+                    <section className="grid grid-cols-3 gap-4 rounded bg-secondary p-4">
+                        {report.missedCharacters.map((letter) => (
+                            <LongCard
+                                heading={letter.letter}
+                                content={letter.count}
+                            />
+                        ))}
+                    </section>
+                </>
+            ) : null}
         </section>
     );
 }

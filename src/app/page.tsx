@@ -74,6 +74,8 @@ export default function Home() {
         if (appState.current === AppState.READY) {
             toast("test started");
             setTimer(0);
+            setUserTyped("");
+            setMissedLetters([]);
             appState.current = AppState.RUNNING;
             timerInterval.current = setInterval(
                 () => setTimer((t) => t + 100),
@@ -123,6 +125,7 @@ export default function Home() {
     function generateWords() {
         const generator = new TestGenerator();
         setWords(generator.normalTest());
+        setUserTyped("");
         appState.current = AppState.READY;
     }
 
