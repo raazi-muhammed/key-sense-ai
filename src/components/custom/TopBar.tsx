@@ -3,6 +3,7 @@ import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { TypingMode, useStore } from "@/store/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import ProfileDropDown from "./ProfileDropDown";
 
 function msToTime(milliseconds: number) {
     const minutes = Math.floor(milliseconds / (1000 * 60));
@@ -25,8 +26,9 @@ export default function TopBar({
     const { typingMode, setTypingMode } = useStore();
 
     return (
-        <section className="h-[30svh] bg-secondary flex flex-col justify-between py-8">
-            <section className="flex justify-center">
+        <section className="flex h-[30svh] flex-col justify-between bg-secondary py-8">
+            <section className="container flex justify-between gap-4">
+                <div className="opacity-0">|</div>
                 <Tabs
                     defaultValue={typingMode}
                     onValueChange={(mode) => setTypingMode(mode as TypingMode)}>
@@ -45,15 +47,16 @@ export default function TopBar({
                         Change your password here.
                     </TabsContent>
                 </Tabs>
+                <ProfileDropDown />
             </section>
-            <section className="flex justify-between mt-auto  max-w-[80ch] mx-auto w-full">
+            <section className="mx-auto mt-auto flex w-full max-w-[80ch] justify-between">
                 <section>
-                    <small className="text-base bg-card block w-fit px-3 py-1 rounded-full border">
+                    <small className="block w-fit rounded-full border bg-card px-3 py-1 text-base">
                         Topic
                     </small>
                     <div className="flex">
                         <Input
-                            className="text-xl underline font-mono w-fit bg-secondary border-none focus-visible:ring-none focus-visible:outline-none focus-visible:border-none focus-visible:ring-2-none"
+                            className="focus-visible:ring-none focus-visible:ring-2-none w-fit border-none bg-secondary font-mono text-xl underline focus-visible:border-none focus-visible:outline-none"
                             value={topic}
                             onChange={(e) => setTopic(e.target.value)}
                         />
@@ -64,10 +67,10 @@ export default function TopBar({
                     </div>
                 </section>
                 <section>
-                    <small className="text-base bg-card block w-fit px-3 py-1 rounded-full border ms-auto">
+                    <small className="ms-auto block w-fit rounded-full border bg-card px-3 py-1 text-base">
                         Time
                     </small>
-                    <p className="text-xl underline font-mono ms-auto text-end">
+                    <p className="ms-auto text-end font-mono text-xl underline">
                         {msToTime(timer)}
                     </p>
                     <span>{timer}</span>
