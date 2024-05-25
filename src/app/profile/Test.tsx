@@ -7,24 +7,36 @@ import moment from "moment";
 import {
     Table,
     TableBody,
-    TableCaption,
     TableCell,
     TableHead,
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
+import { Card } from "@/components/ui/card";
 
 export default function TestAPI() {
-    const [data, setData] = useState<Test[]>([]);
+    const [tests, setTests] = useState<Test[]>([]);
+    const [report, setReport] = useState<{ letter: string; count: number }[]>(
+        []
+    );
 
     useEffect(() => {
         axios.get("/api/tests/reports").then((res) => {
-            setData(res.data.tests);
+            setTests(res.data.tests);
+            setReport(res.data.report);
         });
     }, []);
 
     return (
         <>
+            <section className="flex gap-1">
+                {report.map((letter) => (
+                    <Card className="w-fit p-2">
+                        <p>{letter.letter}</p>
+                        <p>{letter.count}</p>
+                    </Card>
+                ))}
+            </section>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -35,7 +47,7 @@ export default function TestAPI() {
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {data.map((test) => (
+                    {tests.map((test) => (
                         <TableRow>
                             <TableCell>
                                 {moment(test.createdAt).format("LLL")}
