@@ -53,6 +53,24 @@ export default function Home() {
             .finally(() => (appState.current = AppState.READY));
     }
 
+    function generateTestFromMissed({ letters }: { letters: string[] }) {
+        if (appState.current === AppState.LOADING) {
+            toast("Already generating content");
+            return;
+        }
+        appState.current = AppState.LOADING;
+        setTimer(0);
+
+        const generator = new TestGenerator();
+        generator
+            .missedTest(letters)
+            .then((words) => {
+                setWords(words);
+                setUserTyped("");
+            })
+            .finally(() => (appState.current = AppState.READY));
+    }
+
     useEffect(() => {
         generateWords();
     }, []);
@@ -133,6 +151,7 @@ export default function Home() {
         <main>
             <TopBar
                 generateTestFromTopic={generateTestFromTopic}
+                generateTestFromMissed={generateTestFromMissed}
                 timer={timer}
             />
             <section>

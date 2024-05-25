@@ -3,6 +3,7 @@ import { create } from "zustand";
 export enum TypingMode {
     NORMAL = "NORMAL",
     AI_TOPIC_GENERATION = "AI_TOPIC_GENERATION",
+    AI_MISSED_LETTER_GENERATION = "AI_MISSED_LETTER_GENERATION",
 }
 
 type Store = {
