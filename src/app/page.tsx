@@ -1,13 +1,12 @@
 "use client";
 
 import { toast } from "sonner";
-import { faker } from "@faker-js/faker";
 import { useEffect, useRef, useState } from "react";
 import TopBar from "@/components/custom/TopBar";
 import { Button } from "@/components/ui/button";
-import axios from "axios";
 import { Skeleton } from "@/components/ui/skeleton";
 import Key from "@/components/custom/Key";
+import { TestGenerator } from "@/services/testGenerator";
 
 export default function Home() {
     const [words, setWords] = useState("");
@@ -17,11 +16,10 @@ export default function Home() {
     const [missedLetters, setMissedLetters] = useState<string[]>([]);
     const [timer, setTimer] = useState(0);
     const [loading, setLoading] = useState(false);
-    const divRef = useRef<any>();
+    const carrot = useRef<any>();
 
     function scrollIntoView() {
-        const { current } = divRef;
-
+        const { current } = carrot;
         if (current !== null) {
             current.scrollIntoView({
                 behavior: "smooth",
@@ -35,10 +33,12 @@ export default function Home() {
             return;
         }
         setLoading(true);
-        axios
-            .post("/api/type", { topic })
-            .then((res) => {
-                setWords(res.data.response);
+
+        const generator = new TestGenerator();
+        generator
+            .topicTest(topic)
+            .then((words) => {
+                setWords(words);
                 setUserTyped("");
             })
             .finally(() => setLoading(false));
@@ -56,7 +56,6 @@ export default function Home() {
     }, [words]);
 
     function handleKeyDown(s: any) {
-        let interval = null;
         if (!isRunning.current) {
             toast("test started");
             setTimer(0);
@@ -98,8 +97,8 @@ export default function Home() {
     }
 
     function generateWords() {
-        const words = faker.lorem.lines(15);
-        setWords(words);
+        const generator = new TestGenerator();
+        setWords(generator.normalTest());
     }
 
     return (
@@ -108,32 +107,31 @@ export default function Home() {
                 generateTestFromTopic={generateTestFromTopic}
                 timer={timer}
             />
-
             <section>
-                <div className="relative max-w-[80ch] mx-auto">
+                <div className="relative mx-auto max-w-[80ch]">
                     {words.length === userTyped.length ? (
                         <section>
-                            <div className="grid gap-4 grid-cols-3">
-                                <section className="bg-card border rounded p-4 ">
+                            <div className="grid grid-cols-3 gap-4">
+                                <section className="rounded border bg-card p-4">
                                     <p className="">Characters typed</p>
                                     <p className="text-lg">
                                         {userTyped.length}
                                     </p>
                                 </section>
-                                <section className="bg-card border rounded p-4">
+                                <section className="rounded border bg-card p-4">
                                     <p className="">Number of missed letters</p>
                                     <p className="text-lg">
                                         {missedLetters.length}
                                     </p>
                                 </section>
-                                <section className="bg-card border rounded p-4">
+                                <section className="rounded border bg-card p-4">
                                     <p className="">Missed letters</p>
                                     <p className="text-lg">
                                         {...[new Set(missedLetters)]}
                                     </p>
                                 </section>
                             </div>
-                            <section className="mx-auto w-fit mt-4">
+                            <section className="mx-auto mt-4 w-fit">
                                 <Button
                                     onClick={() => {
                                         setUserTyped("");
@@ -145,27 +143,27 @@ export default function Home() {
                         </section>
                     ) : loading ? (
                         <div className="flex flex-col space-y-3 py-16">
-                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
-                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
-                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
-                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
-                            <Skeleton className="w-full h-10 my-1 mx-[1px] rounded-[.25em]" />
+                            <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
+                            <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
+                            <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
+                            <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
+                            <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
                         </div>
                     ) : (
-                        <section className="overflow-y-scroll h-[50svh] py-16">
+                        <section className="h-[50svh] overflow-y-scroll py-16">
                             <div className="relative">
-                                <p className="text-3xl font-mono opacity-50 flex flex-wrap">
+                                <p className="flex flex-wrap font-mono text-3xl opacity-50">
                                     {words.split("").map((key) => (
                                         <Key code={key.charCodeAt(0)} />
                                     ))}
                                 </p>
-                                <p className="text-3xl text-white font-mono absolute inset-0 flex flex-wrap h-fit">
+                                <p className="absolute inset-0 flex h-fit flex-wrap font-mono text-3xl text-white">
                                     {userTyped.split("").map((key) => (
                                         <Key code={key.charCodeAt(0)} />
                                     ))}
                                     <span
-                                        ref={divRef}
-                                        className="-ms-2 animate-pulse duration-400">
+                                        ref={carrot}
+                                        className="duration-400 -ms-2 animate-pulse">
                                         |
                                     </span>
                                 </p>
