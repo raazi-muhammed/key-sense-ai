@@ -7,7 +7,6 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Key from "@/components/custom/Key";
 import { TestGenerator } from "@/services/testGenerator";
-import { findTypingAccuracy, findTypingSpeed } from "@/lib/typing";
 import Result from "@/components/custom/Result";
 
 enum AppState {
@@ -110,9 +109,9 @@ export default function Home() {
             }
 
             if (prevUserTyped.length + 1 === words.length) {
-                if (timerInterval.current) clearInterval(timerInterval.current);
                 appState.current = AppState.COMPLETED;
                 toast("Test finished");
+                if (timerInterval.current) clearInterval(timerInterval.current);
             }
 
             return prevUserTyped + characterTyped;

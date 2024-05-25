@@ -1,8 +1,5 @@
 import { GoogleGenerativeAI } from "@google/generative-ai";
 
-export async function GET() {
-    return Response.json({ Ho: "Hello world" });
-}
 export async function POST(request: Request) {
     const data = await request.json();
 

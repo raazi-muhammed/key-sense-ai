@@ -1,6 +1,7 @@
 import { findTypingAccuracy, findTypingSpeed } from "@/lib/typing";
-import React from "react";
+import React, { useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
+import axios from "axios";
 
 type Report = {
     typingSpeed: number;
@@ -55,6 +56,17 @@ export default function Result({
         typingSpeed: findTypingSpeed(numberOfCharactersTyped, timeTaken),
         missedCharacters: generateMissedLetterArray(missedLetters),
     };
+
+    useEffect(() => {
+        axios
+            .post("/api/tests/reports", report)
+            .then((res) => {
+                console.log(res);
+            })
+            .catch((err) => {
+                console.log(err);
+            });
+    }, []);
 
     return (
         <section className="grid gap-4">
