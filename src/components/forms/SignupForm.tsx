@@ -37,7 +37,7 @@ export function SignupForm() {
     function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values);
         axios
-            .post("/api/signup", values)
+            .post("/api/users", values)
             .then((res) => {
                 console.log(res);
                 router.push("/api/auth/signin");

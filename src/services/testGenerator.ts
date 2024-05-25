@@ -6,7 +6,7 @@ export class TestGenerator {
 
     async topicTest(topic: string) {
         return axios
-            .post("/api/type", { topic })
+            .post("/api/tests/generate", { topic })
             .then((res) => res.data.response);
     }
 
