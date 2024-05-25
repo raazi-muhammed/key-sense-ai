@@ -11,7 +11,7 @@ export class TestGenerator {
     }
 
     normalTest() {
-        const words = faker.lorem.lines(5);
+        const words = faker.lorem.words(3);
         return words;
     }
 }

@@ -7,15 +7,24 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Key from "@/components/custom/Key";
 import { TestGenerator } from "@/services/testGenerator";
+import { findTypingAccuracy, findTypingSpeed } from "@/lib/typing";
+import Result from "@/components/custom/Result";
+
+enum AppState {
+    RUNNING = "RUNNING",
+    COMPLETED = "COMPLETED",
+    LOADING = "LOADING",
+    READY = "READY",
+}
 
 export default function Home() {
+    const appState = useRef(AppState.LOADING);
+
     const [words, setWords] = useState("");
     const [userTyped, setUserTyped] = useState("");
-    const isRunning = useRef(false);
     const timerInterval = useRef<any>(null);
     const [missedLetters, setMissedLetters] = useState<string[]>([]);
     const [timer, setTimer] = useState(0);
-    const [loading, setLoading] = useState(false);
     const carrot = useRef<any>();
 
     function scrollIntoView() {
@@ -28,11 +37,12 @@ export default function Home() {
     }
 
     function generateTestFromTopic({ topic }: { topic: string }) {
-        if (loading) {
+        if (appState.current === AppState.LOADING) {
             toast("Already generating content");
             return;
         }
-        setLoading(true);
+        appState.current = AppState.LOADING;
+        setTimer(0);
 
         const generator = new TestGenerator();
         generator
@@ -41,7 +51,7 @@ export default function Home() {
                 setWords(words);
                 setUserTyped("");
             })
-            .finally(() => setLoading(false));
+            .finally(() => (appState.current = AppState.READY));
     }
 
     useEffect(() => {
@@ -55,50 +65,66 @@ export default function Home() {
         };
     }, [words]);
 
-    function handleKeyDown(s: any) {
-        if (!isRunning.current) {
+    function handleKeyDown(event: any) {
+        console.log({ userTyped });
+
+        const characterTyped = event.key;
+        const characterTypedCode = characterTyped.charCodeAt(0);
+
+        // Start the test if it isn't already running
+        if (appState.current === AppState.READY) {
             toast("test started");
             setTimer(0);
-            isRunning.current = true;
+            appState.current = AppState.RUNNING;
             timerInterval.current = setInterval(
                 () => setTimer((t) => t + 100),
                 100
             );
         }
-        const characterTyped = s.key;
-        const characterTypedCode = characterTyped.charCodeAt(0);
+
+        if (appState.current !== AppState.RUNNING) {
+            toast("Test not ready");
+            return;
+        }
+
+        setUserTyped((prevUserTyped) => {
+            const lastLetterCode = words.charCodeAt(prevUserTyped.length);
+
+            if (characterTyped === "Backspace") {
+                return prevUserTyped.substring(0, prevUserTyped.length - 1);
+            }
+
+            if (characterTyped === "Enter" && lastLetterCode === 10) {
+                return prevUserTyped + String.fromCharCode(10);
+            }
+
+            if (characterTyped.length > 1) return prevUserTyped;
+
+            if (characterTypedCode !== lastLetterCode) {
+                toast("not same");
+                setMissedLetters((prevMissedLetters) => [
+                    ...prevMissedLetters,
+                    words.charAt(prevUserTyped.length),
+                ]);
+                return prevUserTyped;
+            }
+
+            if (prevUserTyped.length + 1 === words.length) {
+                if (timerInterval.current) clearInterval(timerInterval.current);
+                appState.current = AppState.COMPLETED;
+                toast("Test finished");
+            }
+
+            return prevUserTyped + characterTyped;
+        });
 
         scrollIntoView();
-        setUserTyped((ut) => {
-            const lastLetterCode = words.charCodeAt(ut.length);
-
-            if (characterTyped == "Backspace") {
-                return ut.substring(0, ut.length - 1);
-            }
-
-            if (characterTyped == "Enter" && lastLetterCode == 10) {
-                return ut + String.fromCharCode(10);
-            }
-
-            if (characterTyped.length > 1) return ut;
-
-            if (characterTypedCode != lastLetterCode) {
-                toast("not same");
-                setMissedLetters((ml) => [...ml, words.charAt(ut.length)]);
-                return ut;
-            }
-            if (ut.length + 1 === words.length) {
-                isRunning.current = false;
-
-                if (timerInterval.current) clearInterval(timerInterval.current);
-            }
-            return ut + characterTyped;
-        });
     }
 
     function generateWords() {
         const generator = new TestGenerator();
         setWords(generator.normalTest());
+        appState.current = AppState.READY;
     }
 
     return (
@@ -108,29 +134,14 @@ export default function Home() {
                 timer={timer}
             />
             <section>
-                <div className="relative mx-auto max-w-[80ch]">
-                    {words.length === userTyped.length ? (
+                <div className="relative mx-auto max-w-[80ch] py-8">
+                    {appState.current === AppState.COMPLETED ? (
                         <section>
-                            <div className="grid grid-cols-3 gap-4">
-                                <section className="rounded border bg-card p-4">
-                                    <p className="">Characters typed</p>
-                                    <p className="text-lg">
-                                        {userTyped.length}
-                                    </p>
-                                </section>
-                                <section className="rounded border bg-card p-4">
-                                    <p className="">Number of missed letters</p>
-                                    <p className="text-lg">
-                                        {missedLetters.length}
-                                    </p>
-                                </section>
-                                <section className="rounded border bg-card p-4">
-                                    <p className="">Missed letters</p>
-                                    <p className="text-lg">
-                                        {...[new Set(missedLetters)]}
-                                    </p>
-                                </section>
-                            </div>
+                            <Result
+                                typedLetters={userTyped}
+                                missedLetters={missedLetters}
+                                timeTaken={timer}
+                            />
                             <section className="mx-auto mt-4 w-fit">
                                 <Button
                                     onClick={() => {
@@ -141,7 +152,7 @@ export default function Home() {
                                 </Button>
                             </section>
                         </section>
-                    ) : loading ? (
+                    ) : appState.current === AppState.LOADING ? (
                         <div className="flex flex-col space-y-3 py-16">
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
@@ -149,7 +160,8 @@ export default function Home() {
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
                         </div>
-                    ) : (
+                    ) : appState.current === AppState.READY ||
+                      appState.current === AppState.RUNNING ? (
                         <section className="h-[50svh] overflow-y-scroll py-16">
                             <div className="relative">
                                 <p className="flex flex-wrap font-mono text-3xl opacity-50">
@@ -169,6 +181,8 @@ export default function Home() {
                                 </p>
                             </div>
                         </section>
+                    ) : (
+                        <p>Null</p>
                     )}
                 </div>
             </section>
