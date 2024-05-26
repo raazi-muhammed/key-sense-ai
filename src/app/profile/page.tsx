@@ -1,4 +1,4 @@
-import React from "react";
+import React, { ReactNode } from "react";
 import { options } from "../api/auth/[...nextauth]/options";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
@@ -97,7 +97,7 @@ export default async function Profile({
                         <ChevronLeft />
                     </Button>
                 </Link>
-                <p className="mt-auto text-3xl font-semibold">Profile</p>
+                <Header>Profile</Header>
             </section>
             <section className="grid grid-cols-2 gap-4">
                 <Card className="p-4">
@@ -109,14 +109,20 @@ export default async function Profile({
                     <p>{session?.user?.email}</p>
                 </Card>
             </section>
-            <section className="flex w-full gap-1">
+            <Header>Missed</Header>
+            <section className="container mx-auto flex w-fit flex-wrap justify-center gap-1">
                 {report.map((letter) => (
-                    <Card className="grid w-fit flex-grow place-items-center p-2">
-                        <p>{letter.letter}</p>
-                        <p>{letter.count}</p>
+                    <Card className="relative aspect-square w-14 place-items-center p-2 font-mono">
+                        <p className="m-0 ms-1 text-lg">
+                            {letter.letter.toUpperCase()}
+                        </p>
+                        <small className="absolute bottom-2 right-2">
+                            {letter.count}
+                        </small>
                     </Card>
                 ))}
             </section>
+            <Header>Tests</Header>
             <Table>
                 <TableHeader>
                     <TableRow>
@@ -176,4 +182,8 @@ export default async function Profile({
             </Pagination>
         </main>
     );
+}
+
+function Header({ children }: { children: string }) {
+    return <h3 className="font-mono text-2xl font-bold">{children}</h3>;
 }
