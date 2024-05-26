@@ -1,11 +1,12 @@
 import React, { useEffect, useState } from "react";
-import { Button } from "../ui/button";
 import { Input } from "../ui/input";
 import { TypingMode, useStore } from "@/store/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import ProfileDropDown from "./ProfileDropDown";
 import axios from "axios";
 import { Crosshair, GraduationCap, Keyboard, Sparkles } from "lucide-react";
+import { motion } from "framer-motion";
+import { MotionButton, normal } from "../animated/button";
 
 function msToTime(milliseconds: number) {
     const minutes = Math.floor(milliseconds / (1000 * 60));
@@ -136,9 +137,18 @@ function Timer({ timer }: { timer: number }) {
             <small className="ms-auto block w-fit rounded-full border bg-card px-3 py-1 text-base">
                 Time
             </small>
-            <p className="ms-auto text-end font-mono text-xl underline">
-                {msToTime(timer)}
-            </p>
+            <div className="ms-auto flex overflow-hidden text-end font-mono text-xl underline">
+                {msToTime(timer)
+                    .split("")
+                    .map((letter, index) => (
+                        <motion.p
+                            key={`${letter}-${index}`}
+                            initial={{ y: -12 }}
+                            animate={{ y: 0 }}>
+                            {letter}
+                        </motion.p>
+                    ))}
+            </div>
         </section>
     );
 }
@@ -151,7 +161,11 @@ function GenerateButton({
     className?: string;
 }) {
     return (
-        <Button
+        <MotionButton
+            variants={normal}
+            whileTap="tap"
+            animate="show"
+            whileHover="hover"
             className={className}
             size="sm"
             onClick={(e) => {
@@ -160,6 +174,6 @@ function GenerateButton({
             }}>
             <Sparkles className="me-2" size="1.4em" />
             Generate
-        </Button>
+        </MotionButton>
     );
 }
