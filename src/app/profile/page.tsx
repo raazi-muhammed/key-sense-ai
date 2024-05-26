@@ -9,16 +9,42 @@ import { getServerSession } from "next-auth/next";
 import Test from "@/models/test";
 import Report from "@/models/report";
 import User from "@/models/user";
-import ReportSection from "./Report";
+import moment from "moment";
+import {
+    Table,
+    TableBody,
+    TableCell,
+    TableHead,
+    TableHeader,
+    TableRow,
+} from "@/components/ui/table";
+import {
+    Pagination,
+    PaginationContent,
+    PaginationItem,
+    PaginationLink,
+    PaginationNext,
+    PaginationPrevious,
+} from "@/components/ui/pagination";
 
-async function getReports(userEmail: string | undefined) {
+const ITEMS_PER_PAGE = 10;
+
+async function getReports(
+    userEmail: string | undefined,
+    pagination: { page: number }
+) {
     connectDB();
     const user = await User.findOne({ email: userEmail });
     if (!user) throw new Error("no usr found");
 
-    const tests = await Test.find({ user: user._id }).sort({
-        createdAt: -1,
-    });
+    const tests = await Test.find({ user: user._id })
+        .sort({
+            createdAt: -1,
+        })
+        .skip(pagination.page * ITEMS_PER_PAGE)
+        .limit(ITEMS_PER_PAGE);
+
+    const totalCount = await Test.estimatedDocumentCount({ user: user._id });
 
     const report = await Report.findOne({ user: user._id });
 
@@ -35,10 +61,17 @@ async function getReports(userEmail: string | undefined) {
     return {
         tests,
         report: formattedReport,
+        pagination: {
+            noOfPages: Math.ceil(totalCount / ITEMS_PER_PAGE) - 1,
+        },
     };
 }
 
-export default async function Profile() {
+export default async function Profile({
+    searchParams,
+}: {
+    searchParams: { page: string };
+}) {
     const session = await getServerSession(options);
     if (!session?.user?.email) {
         return {
@@ -48,7 +81,13 @@ export default async function Profile() {
             },
         };
     }
-    const data = await getReports(session.user.email);
+
+    const params = searchParams;
+    const pageNumber = Number(params?.page) || 1;
+
+    const { report, tests, pagination } = await getReports(session.user.email, {
+        page: pageNumber,
+    });
 
     return (
         <main className="container space-y-4">
@@ -70,7 +109,71 @@ export default async function Profile() {
                     <p>{session?.user?.email}</p>
                 </Card>
             </section>
-            <ReportSection report={data.report} tests={data.tests} />
+            <section className="flex w-full gap-1">
+                {report.map((letter) => (
+                    <Card className="grid w-fit flex-grow place-items-center p-2">
+                        <p>{letter.letter}</p>
+                        <p>{letter.count}</p>
+                    </Card>
+                ))}
+            </section>
+            <Table>
+                <TableHeader>
+                    <TableRow>
+                        <TableHead>Date</TableHead>
+                        <TableHead>Speed</TableHead>
+                        <TableHead>Accuracy</TableHead>
+                        <TableHead>Time taken</TableHead>
+                    </TableRow>
+                </TableHeader>
+                <TableBody>
+                    {tests.map((test) => (
+                        <TableRow>
+                            <TableCell>
+                                {moment(test.createdAt).format("LLL")}
+                            </TableCell>
+                            <TableCell>{test.typingSpeed} WPM</TableCell>
+                            <TableCell>{test.typingAccuracy}%</TableCell>
+                            <TableCell>{test.timeTakenInSeconds}s</TableCell>
+                        </TableRow>
+                    ))}
+                </TableBody>
+            </Table>
+            <Pagination>
+                <PaginationContent>
+                    <PaginationItem>
+                        <PaginationPrevious
+                            href={`profile?page=${
+                                pageNumber - 1 > 0 ? pageNumber - 1 : pageNumber
+                            }`}
+                        />
+                    </PaginationItem>
+                    {Array(pagination.noOfPages)
+                        .fill(0)
+                        .map((i, index) => (
+                            <PaginationItem>
+                                <PaginationLink
+                                    className={
+                                        index + 1 === pageNumber
+                                            ? "bg-muted"
+                                            : ""
+                                    }
+                                    href={`profile?page=${index + 1}`}>
+                                    {index + 1}
+                                </PaginationLink>
+                            </PaginationItem>
+                        ))}
+                    <PaginationItem>
+                        <PaginationNext
+                            href={`profile?page=${
+                                pageNumber + 1 < pagination.noOfPages
+                                    ? pageNumber + 1
+                                    : pageNumber
+                            }`}
+                        />
+                    </PaginationItem>
+                </PaginationContent>
+            </Pagination>
         </main>
     );
 }
