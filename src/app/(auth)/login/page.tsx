@@ -1,6 +1,13 @@
 import { LoginForm } from "@/components/forms/LoginForm";
 import React from "react";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+    CardTitle,
+} from "@/components/ui/card";
+import Link from "next/link";
 
 export default function page() {
     return (
@@ -11,6 +18,11 @@ export default function page() {
             <CardContent>
                 <LoginForm />
             </CardContent>
+            <CardFooter className="flex justify-center">
+                <Link className="text-xs underline" href="/signup">
+                    Singin
+                </Link>
+            </CardFooter>
         </Card>
     );
 }

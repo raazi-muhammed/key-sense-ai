@@ -118,8 +118,6 @@ export async function GET(request: NextRequest) {
             report: formattedReport,
         });
     } catch (error) {
-        console.log(error);
-
         return NextResponse.json(
             {
                 message: "An error occurred",

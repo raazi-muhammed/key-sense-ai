@@ -21,7 +21,14 @@ export function useWords({
         test.then((words) => {
             appState.current = AppState.READY;
             setWords(words);
-        });
+        })
+            .catch((err) => {
+                setWords(words);
+                toast(err?.response?.data?.message || "An error occurred");
+            })
+            .finally(() => {
+                appState.current = AppState.READY;
+            });
     }
 
     function generateNormalTest({ numberOfWords }: { numberOfWords: number }) {

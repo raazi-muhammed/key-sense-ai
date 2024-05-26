@@ -48,7 +48,7 @@ export function SignupForm() {
     }
     return (
         <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
+            <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
                 <FormField
                     control={form.control}
                     name="name"
@@ -88,7 +88,9 @@ export function SignupForm() {
                         </FormItem>
                     )}
                 />
-                <Button type="submit">Submit</Button>
+                <Button type="submit" className="w-full">
+                    Sign Up
+                </Button>
             </form>
         </Form>
     );
