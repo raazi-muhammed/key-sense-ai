@@ -1,38 +1,42 @@
 import { TestGenerator } from "@/services/testGenerator";
-import { useState } from "react";
+import { MutableRefObject, useState } from "react";
+import { AppState } from "./useEngine";
+import { toast } from "sonner";
 
-export function useWords(
-    setTestWords: (test: Promise<string>) => Promise<undefined | string>
-) {
+export function useWords({
+    appState,
+}: {
+    appState: MutableRefObject<AppState>;
+}) {
     const [words, setWords] = useState("");
 
-    async function generateNormalTest({
-        numberOfWords,
-    }: {
-        numberOfWords: number;
-    }) {
-        const generator = new TestGenerator();
+    function setTestWords(test: Promise<string>) {
+        if (appState.current === AppState.LOADING) {
+            toast("Already generating content");
+            return;
+        }
         setWords("");
-        const generatedWords = await setTestWords(
-            generator.normalTest(numberOfWords)
-        );
-        if (generatedWords) setWords(generatedWords);
+        appState.current = AppState.LOADING;
+
+        test.then((words) => {
+            appState.current = AppState.READY;
+            setWords(words);
+        });
     }
 
-    async function generateTestFromTopic({ topic }: { topic: string }) {
+    function generateNormalTest({ numberOfWords }: { numberOfWords: number }) {
         const generator = new TestGenerator();
-        setWords("");
-        const generatedWords = await setTestWords(generator.topicTest(topic));
-        if (generatedWords) setWords(generatedWords);
+        setTestWords(generator.normalTest(numberOfWords));
     }
 
-    async function generateTestFromMissed({ letters }: { letters: string[] }) {
+    function generateTestFromTopic({ topic }: { topic: string }) {
         const generator = new TestGenerator();
-        setWords("");
-        const generatedWords = await setTestWords(
-            generator.missedTest(letters)
-        );
-        if (generatedWords) setWords(generatedWords);
+        setTestWords(generator.topicTest(topic));
+    }
+
+    function generateTestFromMissed({ letters }: { letters: string[] }) {
+        const generator = new TestGenerator();
+        setTestWords(generator.missedTest(letters));
     }
 
     return {
