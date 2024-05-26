@@ -19,3 +19,9 @@ export function findTypingAccuracy(
     const accuracy = (correctCharacters / numberOfCharactersTyped) * 1000;
     return Math.floor(accuracy) / 10;
 }
+
+const pattern = /^[a-zA-Z0-9]+$/;
+
+export function isAlphanumerical(s: string): boolean {
+    return pattern.test(s);
+}

@@ -1,3 +1,4 @@
+import { isAlphanumerical } from "@/lib/typing";
 import { MutableRefObject, useRef, useState } from "react";
 import { toast } from "sonner";
 
@@ -54,6 +55,7 @@ export function useEngine({
         }
 
         setUserTyped((prevUserTyped) => {
+            const lastLetter = words.charAt(prevUserTyped.length);
             const lastLetterCode = words.charCodeAt(prevUserTyped.length);
 
             if (characterTyped === "Backspace") {
@@ -68,10 +70,13 @@ export function useEngine({
 
             if (characterTypedCode !== lastLetterCode) {
                 toast("not same");
-                setMissedLetters((prevMissedLetters) => [
-                    ...prevMissedLetters,
-                    words.charAt(prevUserTyped.length),
-                ]);
+
+                if (isAlphanumerical(lastLetter)) {
+                    setMissedLetters((prevMissedLetters) => [
+                        ...prevMissedLetters,
+                        lastLetter,
+                    ]);
+                }
                 return prevUserTyped;
             }
 
