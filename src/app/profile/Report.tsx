@@ -1,8 +1,5 @@
-"use client";
-
 import { Test } from "@/types/entities";
-import axios from "axios";
-import React, { useEffect, useState } from "react";
+import React from "react";
 import moment from "moment";
 import {
     Table,
@@ -14,19 +11,13 @@ import {
 } from "@/components/ui/table";
 import { Card } from "@/components/ui/card";
 
-export default function TestAPI() {
-    const [tests, setTests] = useState<Test[]>([]);
-    const [report, setReport] = useState<{ letter: string; count: number }[]>(
-        []
-    );
-
-    useEffect(() => {
-        axios.get("/api/tests/reports").then((res) => {
-            setTests(res.data.tests);
-            setReport(res.data.report);
-        });
-    }, []);
-
+export default function ReportSection({
+    tests,
+    report,
+}: {
+    tests: Test[];
+    report: { letter: string; count: number }[];
+}) {
     return (
         <>
             <section className="flex gap-1">
@@ -59,8 +50,6 @@ export default function TestAPI() {
                     ))}
                 </TableBody>
             </Table>
-
-            <section></section>
         </>
     );
 }
