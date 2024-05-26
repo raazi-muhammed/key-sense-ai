@@ -1,29 +1,17 @@
 "use client";
-
 import { toast } from "sonner";
 import { useEffect, useRef, useState } from "react";
 import TopBar from "@/components/custom/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import Key from "@/components/custom/Key";
+import { TestGenerator } from "@/services/testGenerator";
 import Result from "@/components/custom/Result";
-import { useWords } from "@/hooks/useWords";
-
-enum AppState {
-    RUNNING = "RUNNING",
-    COMPLETED = "COMPLETED",
-    LOADING = "LOADING",
-    READY = "READY",
-}
+import { AppState } from "./page";
 
 export default function Home() {
-    const appState = useRef(AppState.READY);
-    const {
-        words,
-        generateNormalTest,
-        generateTestFromTopic,
-        generateTestFromMissed,
-    } = useWords(setTestWords);
+    const appState = useRef(AppState.COMPLETED);
+    const [words, setWords] = useState("");
     const [userTyped, setUserTyped] = useState("");
     const timerInterval = useRef<any>(null);
     const [missedLetters, setMissedLetters] = useState<string[]>([]);
@@ -39,36 +27,46 @@ export default function Home() {
         }
     }
 
-    async function setTestWords(
-        test: Promise<string>
-    ): Promise<undefined | string> {
+    function setTestWords(test: Promise<string>) {
         if (appState.current === AppState.LOADING) {
             toast("Already generating content");
             return;
         }
-
         appState.current = AppState.LOADING;
+        setWords("");
 
-        return test
-            .then((words) => {
-                setUserTyped("");
-                return words;
-            })
-            .finally(() => {
-                appState.current = AppState.READY;
-                setTimer(0);
-            });
+        test.then((words) => {
+            setWords(words);
+            setUserTyped("");
+        }).finally(() => {
+            appState.current = AppState.READY;
+            setTimer(0);
+        });
+    }
+
+    function generateTestFromTopic({ topic }: { topic: string }) {
+        const generator = new TestGenerator();
+        setTestWords(generator.topicTest(topic));
+    }
+
+    function generateTestFromMissed({ letters }: { letters: string[] }) {
+        const generator = new TestGenerator();
+        setTestWords(generator.missedTest(letters));
+    }
+
+    function generateNormalTest({ numberOfWords }: { numberOfWords: number }) {
+        const generator = new TestGenerator();
+        await setTestWords(generator.normalTest(numberOfWords));
     }
 
     useEffect(() => {
-        generateNormalTest({ numberOfWords: 50 });
+        // generateNormalTest({ numberOfWords: 50 });
     }, []);
 
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
         return () => {
             window.removeEventListener("keydown", handleKeyDown);
-            clearInterval(timerInterval.current);
         };
     }, [words]);
 

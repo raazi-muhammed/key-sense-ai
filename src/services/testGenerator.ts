@@ -5,7 +5,7 @@ import axios from "axios";
 export class TestGenerator {
     constructor() {}
 
-    async topicTest(topic: string) {
+    async topicTest(topic: string): Promise<string> {
         return axios
             .post(
                 `/api/tests/generate?type=${TypingMode.AI_TOPIC_GENERATION}`,
@@ -13,7 +13,7 @@ export class TestGenerator {
             )
             .then((res) => res.data.response);
     }
-    async missedTest(letters: string[]) {
+    async missedTest(letters: string[]): Promise<string> {
         return axios
             .post(
                 `/api/tests/generate?type=${TypingMode.AI_MISSED_LETTER_GENERATION}`,
@@ -22,8 +22,8 @@ export class TestGenerator {
             .then((res) => res.data.response);
     }
 
-    normalTest() {
-        const words = faker.lorem.words(3);
+    async normalTest(numberOfWords: number): Promise<string> {
+        const words = faker.lorem.words(numberOfWords);
         return words;
     }
 }
