@@ -30,7 +30,7 @@ export default function Home() {
 
     useEffect(() => {
         generateNormalTest({ numberOfWords: 50 });
-    }, [generateNormalTest]);
+    }, []);
 
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
@@ -38,7 +38,7 @@ export default function Home() {
             window.removeEventListener("keydown", handleKeyDown);
             resetTest();
         };
-    }, [words, handleKeyDown]);
+    }, [words]);
 
     return (
         <main>
