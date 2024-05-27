@@ -42,19 +42,8 @@ export const POST = AsyncCallback(async (request: NextRequest) => {
     missedCharacters.forEach((d) => {
         const charCode = d.letter.charCodeAt(0);
 
-        console.log(
-            newMissedLetters[charCode],
-            d.count,
-            newMissedLetters[charCode] || 0 + d.count
-        );
-
         newMissedLetters[charCode] =
             newMissedLetters[charCode] + d.count || d.count;
-    });
-
-    console.log({
-        missedCharacters,
-        newMissedLetters,
     });
 
     await Report.updateOne(

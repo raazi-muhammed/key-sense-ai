@@ -1,3 +1,4 @@
+import { connectDB } from "@/lib/database";
 import { AsyncCallback, ErrorHandler } from "@/lib/errorHandler";
 import User from "@/models/user";
 import { TypingMode } from "@/store/store";
@@ -8,6 +9,7 @@ import { NextRequest, NextResponse } from "next/server";
 export const POST = AsyncCallback(async (request: NextRequest) => {
     const data = await request.json();
 
+    connectDB();
     const token = await getToken({ req: request });
     if (!token?.email) throw new ErrorHandler("Please sign in", 401);
 

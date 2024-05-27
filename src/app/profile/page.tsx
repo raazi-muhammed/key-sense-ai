@@ -112,7 +112,9 @@ export default async function Profile({
             <Header>Missed</Header>
             <section className="container mx-auto flex w-fit flex-wrap justify-center gap-1">
                 {report.map((letter) => (
-                    <Card className="relative aspect-square w-14 place-items-center p-2 font-mono">
+                    <Card
+                        key={letter.letter}
+                        className="relative aspect-square w-14 place-items-center p-2 font-mono">
                         <p className="m-0 ms-1 text-lg">
                             {letter.letter.toUpperCase()}
                         </p>
@@ -133,8 +135,8 @@ export default async function Profile({
                     </TableRow>
                 </TableHeader>
                 <TableBody>
-                    {tests.map((test) => (
-                        <TableRow>
+                    {tests.map((test, index) => (
+                        <TableRow key={index}>
                             <TableCell>
                                 {moment(test.createdAt).format("LLL")}
                             </TableCell>
@@ -157,7 +159,7 @@ export default async function Profile({
                     {Array(pagination.noOfPages)
                         .fill(0)
                         .map((i, index) => (
-                            <PaginationItem>
+                            <PaginationItem key={index}>
                                 <PaginationLink
                                     className={
                                         index + 1 === pageNumber

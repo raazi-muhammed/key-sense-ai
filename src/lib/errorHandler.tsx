@@ -5,6 +5,7 @@ export function AsyncCallback(controller: Function) {
         try {
             return await controller(request);
         } catch (error) {
+            console.log(error);
             if (error instanceof ErrorHandler) {
                 return NextResponse.json(
                     {

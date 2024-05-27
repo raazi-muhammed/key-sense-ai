@@ -99,6 +99,7 @@ export default function Result({
                     <section className="grid grid-cols-3 gap-4 rounded bg-secondary p-4">
                         {report.missedCharacters.map((letter) => (
                             <LongCard
+                                key={letter.letter}
                                 heading={letter.letter}
                                 content={letter.count}
                             />

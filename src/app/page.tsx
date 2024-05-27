@@ -30,7 +30,7 @@ export default function Home() {
 
     useEffect(() => {
         generateNormalTest({ numberOfWords: 50 });
-    }, []);
+    }, [generateNormalTest]);
 
     useEffect(() => {
         window.addEventListener("keydown", handleKeyDown);
@@ -38,7 +38,7 @@ export default function Home() {
             window.removeEventListener("keydown", handleKeyDown);
             resetTest();
         };
-    }, [words]);
+    }, [words, handleKeyDown]);
 
     return (
         <main>
@@ -81,13 +81,19 @@ export default function Home() {
                         <section className="h-[50svh] overflow-y-scroll py-16">
                             <div className="relative">
                                 <p className="flex flex-wrap font-mono text-3xl opacity-50">
-                                    {words.split("").map((key) => (
-                                        <Key code={key.charCodeAt(0)} />
+                                    {words.split("").map((key, index) => (
+                                        <Key
+                                            key={index}
+                                            code={key.charCodeAt(0)}
+                                        />
                                     ))}
                                 </p>
                                 <p className="absolute inset-0 flex h-fit flex-wrap font-mono text-3xl text-white">
-                                    {userTyped.split("").map((key) => (
-                                        <Key code={key.charCodeAt(0)} />
+                                    {userTyped.split("").map((key, index) => (
+                                        <Key
+                                            key={index}
+                                            code={key.charCodeAt(0)}
+                                        />
                                     ))}
                                     <span
                                         ref={carrot}
