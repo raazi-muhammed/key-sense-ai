@@ -1,6 +1,7 @@
+import { toast } from "@/components/ui/use-toast";
 import { isAlphanumerical } from "@/lib/typing";
 import { MutableRefObject, useRef, useState } from "react";
-import { toast } from "sonner";
+import { toast as sonner } from "sonner";
 
 export enum AppState {
     RUNNING = "RUNNING",
@@ -38,7 +39,7 @@ export function useEngine({
 
         // Start the test if it isn't already running
         if (appState.current === AppState.READY) {
-            toast("test started");
+            sonner("test started");
             setTimer(0);
             setUserTyped("");
             setMissedLetters([]);
@@ -50,7 +51,7 @@ export function useEngine({
         }
 
         if (appState.current !== AppState.RUNNING) {
-            toast("Test not ready");
+            sonner("Test not ready");
             return;
         }
 
@@ -69,7 +70,10 @@ export function useEngine({
             if (characterTyped.length > 1) return prevUserTyped;
 
             if (characterTypedCode !== lastLetterCode) {
-                toast("not same");
+                toast({
+                    variant: "destructive",
+                    description: `Incorrect letter (${lastLetter})`,
+                });
 
                 if (isAlphanumerical(lastLetter)) {
                     setMissedLetters((prevMissedLetters) => [
@@ -82,7 +86,7 @@ export function useEngine({
 
             if (prevUserTyped.length + 1 === words.length) {
                 appState.current = AppState.COMPLETED;
-                toast("Test finished");
+                sonner("Test finished");
                 if (timerInterval.current) clearInterval(timerInterval.current);
             }
 
