@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import { signIn } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import Spinner from "../custom/Spinner";
 
 const formSchema = z.object({
     email: z.string().email(),
@@ -32,6 +33,8 @@ export function LoginForm() {
         },
     });
 
+    const { isSubmitting } = form.formState;
+
     async function onSubmit(values: z.infer<typeof formSchema>) {
         console.log(values);
         try {
@@ -44,7 +47,9 @@ export function LoginForm() {
                 return;
             }
             router.push("/");
-        } catch (error) {}
+        } catch (error) {
+            toast("An error occurred");
+        }
     }
     return (
         <Form {...form}>
@@ -75,8 +80,11 @@ export function LoginForm() {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="w-full">
-                    Login
+                <Button
+                    type="submit"
+                    className="w-full gap-2"
+                    disabled={isSubmitting}>
+                    <Spinner isLoading={isSubmitting} /> Login
                 </Button>
             </form>
         </Form>

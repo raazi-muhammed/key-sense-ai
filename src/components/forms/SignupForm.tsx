@@ -16,6 +16,7 @@ import { Input } from "@/components/ui/input";
 import axios from "axios";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
+import Spinner from "../custom/Spinner";
 
 const formSchema = z.object({
     name: z.string().min(2),
@@ -33,18 +34,16 @@ export function SignupForm() {
             password: "",
         },
     });
+    const { isSubmitting } = form.formState;
 
-    function onSubmit(values: z.infer<typeof formSchema>) {
-        console.log(values);
-        axios
-            .post("/api/users", values)
-            .then((res) => {
-                console.log(res);
-                router.push("/api/auth/signin");
-            })
-            .catch((err) => {
-                toast(err.response?.data?.message || "invalid");
-            });
+    async function onSubmit(values: z.infer<typeof formSchema>) {
+        try {
+            await axios.post("/api/users", values);
+            router.push("/login");
+            toast("Account created, please login");
+        } catch (error: any) {
+            toast(error.response?.data?.message || "An error occurred");
+        }
     }
     return (
         <Form {...form}>
@@ -88,7 +87,11 @@ export function SignupForm() {
                         </FormItem>
                     )}
                 />
-                <Button type="submit" className="w-full">
+                <Button
+                    type="submit"
+                    className="w-full gap-2"
+                    disabled={isSubmitting}>
+                    <Spinner isLoading={isSubmitting} />
                     Sign Up
                 </Button>
             </form>
