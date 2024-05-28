@@ -19,7 +19,7 @@ export default function page() {
                 <LoginForm />
             </CardContent>
             <CardFooter className="flex justify-center gap-2 text-sm">
-                Don't have an account?
+                Don&apos;t have an account?
                 <Link className="underline" href="/signup">
                     Sign up
                 </Link>
