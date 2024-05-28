@@ -49,7 +49,7 @@ export default function Home() {
                 generateNormalTest={generateNormalTest}
                 timer={timer}
             />
-            <section>
+            <section key={words.length}>
                 <div className="relative mx-auto py-8">
                     {appState.current === AppState.COMPLETED ? (
                         <section className="mx-auto max-w-[80ch]">
