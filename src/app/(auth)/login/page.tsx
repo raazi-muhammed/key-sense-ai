@@ -18,9 +18,10 @@ export default function page() {
             <CardContent>
                 <LoginForm />
             </CardContent>
-            <CardFooter className="flex justify-center">
-                <Link className="text-xs underline" href="/signup">
-                    Singin
+            <CardFooter className="flex justify-center gap-2 text-sm">
+                Don't have an account?
+                <Link className="underline" href="/signup">
+                    Sign up
                 </Link>
             </CardFooter>
         </Card>

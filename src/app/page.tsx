@@ -50,9 +50,9 @@ export default function Home() {
                 timer={timer}
             />
             <section>
-                <div className="relative mx-auto max-w-[80ch] py-8">
+                <div className="relative mx-auto py-8">
                     {appState.current === AppState.COMPLETED ? (
-                        <section>
+                        <section className="max-w-[80ch]">
                             <Result
                                 typedLetters={userTyped}
                                 missedLetters={missedLetters}
@@ -70,7 +70,7 @@ export default function Home() {
                             </section>
                         </section>
                     ) : appState.current === AppState.LOADING ? (
-                        <div className="flex flex-col space-y-3 py-16">
+                        <div className="flex max-w-[80ch] flex-col space-y-3 py-16">
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
                             <Skeleton className="mx-[1px] my-1 h-10 w-full rounded-[.25em]" />
@@ -80,32 +80,36 @@ export default function Home() {
                     ) : appState.current === AppState.READY ||
                       appState.current === AppState.RUNNING ? (
                         <section className="h-[50svh] overflow-y-scroll py-16">
-                            <div className="relative">
-                                <p className="flex flex-wrap font-mono text-3xl opacity-50">
-                                    {words.split("").map((key, index) => (
-                                        <Key
-                                            key={index}
-                                            code={key.charCodeAt(0)}
-                                        />
-                                    ))}
-                                </p>
-                                <p className="absolute inset-0 flex h-fit flex-wrap font-mono text-3xl text-white">
-                                    {userTyped.split("").map((key, index) => (
-                                        <Key
-                                            key={index}
-                                            code={key.charCodeAt(0)}
-                                        />
-                                    ))}
-                                    <span
-                                        ref={carrot}
-                                        className="duration-400 -ms-2 animate-pulse">
-                                        |
-                                    </span>
-                                </p>
+                            <div className="mx-auto max-w-[80ch]">
+                                <div className="relative">
+                                    <p className="flex flex-wrap font-mono text-3xl opacity-50">
+                                        {words.split("").map((key, index) => (
+                                            <Key
+                                                key={index}
+                                                code={key.charCodeAt(0)}
+                                            />
+                                        ))}
+                                    </p>
+                                    <p className="absolute inset-0 flex h-fit flex-wrap font-mono text-3xl text-white">
+                                        {userTyped
+                                            .split("")
+                                            .map((key, index) => (
+                                                <Key
+                                                    key={index}
+                                                    code={key.charCodeAt(0)}
+                                                />
+                                            ))}
+                                        <span
+                                            ref={carrot}
+                                            className="duration-400 -ms-2 animate-pulse">
+                                            |
+                                        </span>
+                                    </p>
+                                </div>
                             </div>
                         </section>
                     ) : (
-                        <p>Null</p>
+                        <p>An error occurred</p>
                     )}
                 </div>
             </section>
