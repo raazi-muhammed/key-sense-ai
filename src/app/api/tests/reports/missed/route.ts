@@ -16,16 +16,19 @@ export const GET = AsyncCallback(async (request: NextRequest) => {
     const report = await Report.findOne({ user: user._id });
 
     const formattedReport = [];
-    for (let i = 0; i < report?.missedLetters?.length; i++) {
-        const current = report.missedLetters[i];
-        if (typeof current == "number" && current > 0)
+    for (let i = 0; i < report?.lettersReport?.length; i++) {
+        const current = report.lettersReport[i];
+
+        if (current)
             formattedReport.push({
                 letter: String.fromCharCode(i),
-                count: current,
+                errorRate: current.missedCount / current.typedCount,
             });
     }
 
-    const top5 = formattedReport.sort((a, b) => b.count - a.count).splice(0, 5);
+    const top5 = formattedReport
+        .sort((a, b) => b.errorRate - a.errorRate)
+        .splice(0, 5);
 
     return NextResponse.json({
         report: top5,

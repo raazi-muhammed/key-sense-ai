@@ -9,26 +9,55 @@ type Report = {
     numberOfCharactersTyped: number;
     numberOfCharactersMissed: number;
     timeTakenInSeconds: number;
-    missedCharacters: {
+    charactersReport: {
         letter: string;
-        count: number;
+        typedCount: number;
+        missedCount: number;
     }[];
 };
 
-function generateMissedLetterArray(missedLetters: string[]) {
-    const missedEvaluation = new Map();
-    missedLetters.forEach((letter) => {
-        if (missedEvaluation.has(letter)) {
-            const current = missedEvaluation.get(letter);
-            missedEvaluation.set(letter, current + 0.5);
+function generateLettersReport({
+    missedLetters,
+    typedLetters,
+}: {
+    missedLetters: string[];
+    typedLetters: string[];
+}) {
+    const lettersEvaluation = new Map();
+    typedLetters.forEach((letter) => {
+        if (lettersEvaluation.has(letter)) {
+            const current = lettersEvaluation.get(letter);
+            lettersEvaluation.set(letter, {
+                ...current,
+                typedCount: current.typedCount + 1,
+            });
         } else {
-            missedEvaluation.set(letter, 0.5);
+            lettersEvaluation.set(letter, {
+                typedCount: 1,
+                missedCount: 0,
+            });
         }
     });
 
-    const items: { letter: string; count: number }[] = [];
-    missedEvaluation.forEach((val, key) => {
-        items.push({ letter: key, count: val });
+    missedLetters.forEach((letter) => {
+        if (lettersEvaluation.has(letter)) {
+            const current = lettersEvaluation.get(letter);
+            lettersEvaluation.set(letter, {
+                ...current,
+                missedCount: current.missedCount + 1,
+            });
+        } else {
+            lettersEvaluation.set(letter, {
+                typedCount: 1,
+                missedCount: 1,
+            });
+        }
+    });
+
+    const items: { letter: string; typedCount: number; missedCount: number }[] =
+        [];
+    lettersEvaluation.forEach((val, key) => {
+        items.push({ letter: key, ...val });
     });
     return items;
 }
@@ -54,10 +83,19 @@ export default function Result({
             numberOfCharactersMissed
         ),
         typingSpeed: findTypingSpeed(numberOfCharactersTyped, timeTaken),
-        missedCharacters: generateMissedLetterArray(missedLetters),
+        charactersReport: generateLettersReport({
+            missedLetters,
+            typedLetters: typedLetters.split(""),
+        }),
     };
 
     useEffect(() => {
+        const data = generateLettersReport({
+            missedLetters,
+            typedLetters: typedLetters.split(""),
+        });
+        console.log({ data });
+
         axios
             .post("/api/tests/reports", report)
             .then((res) => {
@@ -97,11 +135,11 @@ export default function Result({
                     <Separator />
                     <p>Missed letters</p>
                     <section className="grid grid-cols-3 gap-4 rounded bg-secondary p-4">
-                        {report.missedCharacters.map((letter) => (
+                        {report.charactersReport.map((letter) => (
                             <LongCard
                                 key={letter.letter}
                                 heading={letter.letter}
-                                content={letter.count}
+                                content={letter.missedCount}
                             />
                         ))}
                     </section>

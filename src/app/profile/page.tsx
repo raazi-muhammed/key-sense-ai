@@ -1,4 +1,4 @@
-import React, { ReactNode } from "react";
+import React from "react";
 import { options } from "../api/auth/[...nextauth]/options";
 import { Card } from "@/components/ui/card";
 import Link from "next/link";
@@ -41,20 +41,21 @@ async function getReports(
         .sort({
             createdAt: -1,
         })
-        .skip(pagination.page * ITEMS_PER_PAGE)
+        .skip((pagination.page - 1) * ITEMS_PER_PAGE)
         .limit(ITEMS_PER_PAGE);
 
-    const totalCount = await Test.estimatedDocumentCount({ user: user._id });
+    const totalCount = await Test.countDocuments({ user: user._id });
 
     const report = await Report.findOne({ user: user._id });
 
     const formattedReport = [];
-    for (let i = 0; i < report?.missedLetters?.length; i++) {
-        const current = report.missedLetters[i];
-        if (typeof current == "number" && current > 0)
+    for (let i = 0; i < report?.lettersReport?.length; i++) {
+        const current = report.lettersReport[i];
+        if (current)
             formattedReport.push({
                 letter: String.fromCharCode(i),
-                count: current,
+                typedCount: current.typedCount,
+                missedCount: current.missedCount,
             });
     }
 
@@ -62,7 +63,7 @@ async function getReports(
         tests,
         report: formattedReport,
         pagination: {
-            noOfPages: Math.ceil(totalCount / ITEMS_PER_PAGE) - 1,
+            noOfPages: Math.ceil(totalCount / ITEMS_PER_PAGE),
         },
     };
 }
@@ -109,79 +110,110 @@ export default async function Profile({
                     <p>{session?.user?.email}</p>
                 </Card>
             </section>
+
             <Header>Missed</Header>
-            <section className="container mx-auto flex w-fit flex-wrap justify-center gap-1">
-                {report.map((letter) => (
-                    <Card
-                        key={letter.letter}
-                        className="relative aspect-square w-14 place-items-center p-2 font-mono">
-                        <p className="m-0 ms-1 text-lg">
-                            {letter.letter.toUpperCase()}
-                        </p>
-                        <small className="absolute bottom-2 right-2">
-                            {letter.count}
-                        </small>
-                    </Card>
-                ))}
-            </section>
-            <Header>Tests</Header>
-            <Table>
-                <TableHeader>
-                    <TableRow>
-                        <TableHead>Date</TableHead>
-                        <TableHead>Speed</TableHead>
-                        <TableHead>Accuracy</TableHead>
-                        <TableHead>Time taken</TableHead>
-                    </TableRow>
-                </TableHeader>
-                <TableBody>
-                    {tests.map((test, index) => (
-                        <TableRow key={index}>
-                            <TableCell>
-                                {moment(test.createdAt).format("LLL")}
-                            </TableCell>
-                            <TableCell>{test.typingSpeed} WPM</TableCell>
-                            <TableCell>{test.typingAccuracy}%</TableCell>
-                            <TableCell>{test.timeTakenInSeconds}s</TableCell>
-                        </TableRow>
+            {report.length > 0 ? (
+                <section className="container mx-auto flex w-fit flex-wrap justify-center gap-1">
+                    {report.map((letter) => (
+                        <Card
+                            key={letter.letter}
+                            className="relative aspect-square w-14 place-items-center p-2 font-mono">
+                            <p className="m-0 ms-1 text-lg">
+                                {letter.letter.toUpperCase()}
+                            </p>
+                            <small className="absolute bottom-2 right-2">
+                                {Math.floor(
+                                    (letter.missedCount / letter.typedCount) *
+                                        100
+                                )}
+                                %
+                            </small>
+                        </Card>
                     ))}
-                </TableBody>
-            </Table>
-            <Pagination>
-                <PaginationContent>
-                    <PaginationItem>
-                        <PaginationPrevious
-                            href={`profile?page=${
-                                pageNumber - 1 > 0 ? pageNumber - 1 : pageNumber
-                            }`}
-                        />
-                    </PaginationItem>
-                    {Array(pagination.noOfPages)
-                        .fill(0)
-                        .map((i, index) => (
-                            <PaginationItem key={index}>
-                                <PaginationLink
-                                    className={
-                                        index + 1 === pageNumber
-                                            ? "bg-muted"
-                                            : ""
-                                    }
-                                    href={`profile?page=${index + 1}`}>
-                                    {index + 1}
-                                </PaginationLink>
+                </section>
+            ) : (
+                <p className="text-white/50">
+                    Not enough tests to generate report
+                </p>
+            )}
+            <Header>Tests</Header>
+            {true ? (
+                <>
+                    <Table>
+                        <TableHeader>
+                            <TableRow>
+                                <TableHead>Date</TableHead>
+                                <TableHead>Speed</TableHead>
+                                <TableHead>Accuracy</TableHead>
+                                <TableHead>Time taken</TableHead>
+                            </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                            {tests.map((test, index) => (
+                                <TableRow key={index}>
+                                    <TableCell>
+                                        {moment(test.createdAt).format("LLL")}
+                                    </TableCell>
+                                    <TableCell>
+                                        {test.typingSpeed} WPM
+                                    </TableCell>
+                                    <TableCell>
+                                        {test.typingAccuracy}%
+                                    </TableCell>
+                                    <TableCell>
+                                        {test.timeTakenInSeconds}s
+                                    </TableCell>
+                                </TableRow>
+                            ))}
+                        </TableBody>
+                    </Table>
+                    <Pagination className="pb-8">
+                        <PaginationContent>
+                            <PaginationItem>
+                                <PaginationPrevious
+                                    href={`profile?page=${
+                                        pageNumber - 1 > 0
+                                            ? pageNumber - 1
+                                            : pageNumber
+                                    }`}
+                                />
                             </PaginationItem>
-                        ))}
-                    <PaginationItem>
-                        <PaginationNext
-                            href={`profile?page=${
-                                pageNumber + 1 < pagination.noOfPages
-                                    ? pageNumber + 1
-                                    : pageNumber
-                            }`}
-                        />
-                    </PaginationItem>
-                </PaginationContent>
-            </Pagination>
+                            <div className="flex max-w-96 overflow-auto">
+                                {Array(pagination.noOfPages)
+                                    .fill(0)
+                                    .map((i, index) => {
+                                        let rearrangedIndex = index + 1;
+                                        return (
+                                            <PaginationItem key={pageNumber}>
+                                                <PaginationLink
+                                                    className={
+                                                        rearrangedIndex ==
+                                                        pageNumber
+                                                            ? "bg-muted"
+                                                            : ""
+                                                    }
+                                                    href={`profile?page=${rearrangedIndex}`}>
+                                                    {rearrangedIndex}
+                                                </PaginationLink>
+                                            </PaginationItem>
+                                        );
+                                    })}
+                            </div>
+                            <PaginationItem>
+                                <PaginationNext
+                                    href={`profile?page=${
+                                        pageNumber + 1 < pagination.noOfPages
+                                            ? pageNumber + 1
+                                            : pageNumber
+                                    }`}
+                                />
+                            </PaginationItem>
+                        </PaginationContent>
+                    </Pagination>
+                </>
+            ) : (
+                <p className="text-white/50">No tests found</p>
+            )}
         </main>
     );
 }

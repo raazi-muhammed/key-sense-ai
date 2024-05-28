@@ -37,8 +37,6 @@ export default function TopBar({
     );
     useEffect(() => {
         axios.get("/api/tests/reports/missed").then((res) => {
-            console.log(res);
-
             setMissedLetters(res.data.report);
         });
     }, []);
@@ -106,23 +104,30 @@ export default function TopBar({
                         <small className="block w-fit rounded-full border bg-card px-3 py-1 text-base">
                             Top missed
                         </small>
-                        <div className="flex">
-                            <Input
-                                className="focus-visible:ring-none focus-visible:ring-2-none w-fit border-none bg-secondary font-mono text-xl underline focus-visible:border-none focus-visible:outline-none"
-                                value={missedLetters
-                                    .map((letter) => letter.letter)
-                                    .join(",")}
-                            />
-                            <GenerateButton
-                                onClick={() =>
-                                    generateTestFromMissed({
-                                        letters: missedLetters.map(
-                                            (a) => a.letter
-                                        ),
-                                    })
-                                }
-                            />
-                        </div>
+                        {missedLetters.length > 3 ? (
+                            <div className="flex">
+                                <Input
+                                    className="focus-visible:ring-none focus-visible:ring-2-none w-fit border-none bg-secondary font-mono text-xl underline focus-visible:border-none focus-visible:outline-none"
+                                    value={missedLetters
+                                        .map((letter) => letter.letter)
+                                        .join(",")}
+                                />
+                                <GenerateButton
+                                    onClick={() =>
+                                        generateTestFromMissed({
+                                            letters: missedLetters.map(
+                                                (a) => a.letter
+                                            ),
+                                        })
+                                    }
+                                />
+                            </div>
+                        ) : (
+                            <p className="p-2 text-muted-foreground">
+                                You haven&apos;t attended enough test <br />
+                                to start precision practice
+                            </p>
+                        )}
                     </TabsContent>
                     <Timer timer={timer} />
                 </section>

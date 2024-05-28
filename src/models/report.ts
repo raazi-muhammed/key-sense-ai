@@ -6,10 +6,12 @@ const reportSchema = new Schema(
             type: mongoose.Schema.Types.ObjectId,
             ref: "User",
         },
-        missedLetters: {
-            type: Array,
-            default: [],
-        },
+        lettersReport: [
+            {
+                typedCount: String,
+                missedCount: String,
+            },
+        ],
     },
     {
         timestamps: true,

@@ -10,7 +10,7 @@ import { useWords } from "@/hooks/useWords";
 import { AppState, useEngine } from "@/hooks/useEngine";
 
 export default function Home() {
-    const appState = useRef(AppState.READY);
+    const appState = useRef(AppState.LOADING);
 
     const {
         words,
@@ -30,6 +30,7 @@ export default function Home() {
 
     useEffect(() => {
         generateNormalTest({ numberOfWords: 50 });
+        appState.current = AppState.READY;
     }, []);
 
     useEffect(() => {

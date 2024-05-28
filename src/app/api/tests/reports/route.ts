@@ -13,11 +13,12 @@ export const POST = AsyncCallback(async (request: NextRequest) => {
         typingSpeed,
         timeTakenInSeconds,
         numberOfCharactersTyped,
-        missedCharacters,
+        charactersReport,
     }: {
-        missedCharacters: {
+        charactersReport: {
             letter: string;
-            count: number;
+            typedCount: number;
+            missedCount: number;
         }[];
         numberOfCharactersMissed: number;
         typingAccuracy: number;
@@ -35,21 +36,26 @@ export const POST = AsyncCallback(async (request: NextRequest) => {
     if (!user) throw new Error("no usr found");
 
     let report = await Report.findOne({ user: user._id });
-    if (!report) report = await Report.create({ user });
 
-    report.missedLetters as number[];
-    let newMissedLetters: number[] = [...report.missedLetters];
-    missedCharacters.forEach((d) => {
+    if (!report) report = await Report.create({ user, lettersReport: [] });
+
+    report.lettersReport as { typedCount: number; missedCount: number }[];
+    let newLettersReport: { typedCount: number; missedCount: number }[] = [
+        ...report.lettersReport,
+    ];
+    charactersReport.forEach((d) => {
         const charCode = d.letter.charCodeAt(0);
-
-        newMissedLetters[charCode] =
-            newMissedLetters[charCode] + d.count || d.count;
+        const current = newLettersReport[charCode];
+        newLettersReport[charCode] = {
+            typedCount: (current?.typedCount || 0) + d.typedCount,
+            missedCount: (current?.missedCount || 0) + d.missedCount,
+        };
     });
 
     await Report.updateOne(
         { user: user._id },
         {
-            missedLetters: newMissedLetters,
+            lettersReport: newLettersReport,
         }
     );
 
