@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { MutableRefObject, useEffect, useState } from "react";
 import { Input } from "../ui/input";
 import { TypingMode, useStore } from "@/store/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -7,6 +7,8 @@ import axios from "axios";
 import { Crosshair, GraduationCap, Keyboard, Sparkles } from "lucide-react";
 import { motion } from "framer-motion";
 import { MotionButton, normal } from "../animated/button";
+import { AppState } from "@/hooks/useEngine";
+import { toast } from "../ui/use-toast";
 
 function msToTime(milliseconds: number) {
     const minutes = Math.floor(milliseconds / (1000 * 60));
@@ -23,14 +25,16 @@ export default function TopBar({
     generateTestFromTopic,
     generateTestFromMissed,
     generateNormalTest,
+    appState,
 }: {
     timer: number;
+    appState: MutableRefObject<AppState>;
     generateTestFromTopic: (params: { topic: string }) => void;
     generateTestFromMissed: (params: { letters: string[] }) => void;
     generateNormalTest: (params: { numberOfWords: number }) => void;
 }) {
     const [topic, setTopic] = useState("Touch typing");
-    const [numberOfWords, setNumberOfWords] = useState<number>(50);
+    const [numberOfWords, setNumberOfWords] = useState<number | undefined>(50);
     const { typingMode, setTypingMode } = useStore();
     const [missedLetters, setMissedLetters] = useState<{ letter: string }[]>(
         []
@@ -72,15 +76,37 @@ export default function TopBar({
                         <div className="flex">
                             <Input
                                 className="focus-visible:ring-none focus-visible:ring-2-none w-fit border-none bg-secondary font-mono text-xl underline focus-visible:border-none focus-visible:outline-none"
+                                onFocus={() => {
+                                    appState.current = AppState.LOADING;
+                                }}
+                                onBlur={() => {
+                                    if (timer > 0)
+                                        appState.current = AppState.ERROR;
+                                    else appState.current = AppState.READY;
+                                }}
                                 value={numberOfWords}
                                 onChange={(e) => {
-                                    if (isNaN(Number(e.target.value))) return;
-                                    setNumberOfWords(Number(e.target.value));
+                                    if (e.target.value == "") {
+                                        setNumberOfWords(undefined);
+                                        return;
+                                    }
+                                    const number = Number(e.target.value);
+                                    if (isNaN(number)) return;
+                                    if (number > 0 && number < 100) {
+                                        setNumberOfWords(number);
+                                    } else {
+                                        toast({
+                                            variant: "destructive",
+                                            description: "Invalid number",
+                                        });
+                                    }
                                 }}
                             />
                             <GenerateButton
                                 onClick={() =>
-                                    generateNormalTest({ numberOfWords })
+                                    generateNormalTest({
+                                        numberOfWords: numberOfWords || 5,
+                                    })
                                 }
                             />
                         </div>
@@ -93,6 +119,14 @@ export default function TopBar({
                             <Input
                                 className="focus-visible:ring-none focus-visible:ring-2-none w-fit border-none bg-secondary font-mono text-xl underline focus-visible:border-none focus-visible:outline-none"
                                 value={topic}
+                                onFocus={() => {
+                                    appState.current = AppState.LOADING;
+                                }}
+                                onBlur={() => {
+                                    if (timer > 0)
+                                        appState.current = AppState.ERROR;
+                                    else appState.current = AppState.READY;
+                                }}
                                 onChange={(e) => setTopic(e.target.value)}
                             />
                             <GenerateButton

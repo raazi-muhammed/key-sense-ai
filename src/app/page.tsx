@@ -8,6 +8,7 @@ import Key from "@/components/custom/Key";
 import Result from "@/components/custom/Result";
 import { useWords } from "@/hooks/useWords";
 import { AppState, useEngine } from "@/hooks/useEngine";
+import { motion } from "framer-motion";
 
 export default function Home() {
     const appState = useRef(AppState.LOADING);
@@ -26,6 +27,7 @@ export default function Home() {
         timer,
         carrot,
         missedLetters,
+        error,
     } = useEngine({ words, appState });
 
     useEffect(() => {
@@ -44,6 +46,7 @@ export default function Home() {
     return (
         <main>
             <TopBar
+                appState={appState}
                 generateTestFromTopic={generateTestFromTopic}
                 generateTestFromMissed={generateTestFromMissed}
                 generateNormalTest={generateNormalTest}
@@ -99,17 +102,38 @@ export default function Home() {
                                                     code={key.charCodeAt(0)}
                                                 />
                                             ))}
-                                        <span
-                                            ref={carrot}
-                                            className="duration-400 -ms-2 animate-pulse">
-                                            |
-                                        </span>
+                                        <div className="flex">
+                                            <span
+                                                ref={carrot}
+                                                className="duration-400 -ms-2 animate-pulse">
+                                                |
+                                            </span>
+                                            {!!error && (
+                                                <motion.span
+                                                    key={`${error.when.toString()}-${
+                                                        error.letter
+                                                    }`}
+                                                    animate={{
+                                                        opacity: [0, 1, 0],
+                                                        y: [0, 0, 20],
+                                                        scale: [0.5, 1, 1],
+                                                    }}
+                                                    transition={{
+                                                        duration: 0.7,
+                                                    }}
+                                                    className="my-1 -ms-2 block h-10 w-6 rounded-[.25em] border border-red-700 bg-red-950 text-red-500">
+                                                    {error?.letter}
+                                                </motion.span>
+                                            )}
+                                        </div>
                                     </p>
                                 </div>
                             </div>
                         </section>
                     ) : (
-                        <p>An error occurred</p>
+                        <p className="text-center text-muted-foreground">
+                            An error occurred, try regenerating the test
+                        </p>
                     )}
                 </div>
             </section>

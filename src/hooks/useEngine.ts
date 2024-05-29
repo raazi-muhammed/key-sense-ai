@@ -8,6 +8,7 @@ export enum AppState {
     COMPLETED = "COMPLETED",
     LOADING = "LOADING",
     READY = "READY",
+    ERROR = "ERROR",
 }
 
 export function useEngine({
@@ -18,6 +19,9 @@ export function useEngine({
     appState: MutableRefObject<AppState>;
 }) {
     const [userTyped, setUserTyped] = useState("");
+    const [error, setError] = useState<{ letter: string; when: number } | null>(
+        null
+    );
 
     const timerInterval = useRef<any>(null);
     const [missedLetters, setMissedLetters] = useState<string[]>([]);
@@ -34,7 +38,7 @@ export function useEngine({
     }
 
     function handleKeyDown(event: any) {
-        const characterTyped = event.key;
+        const characterTyped: string = event.key;
         const characterTypedCode = characterTyped.charCodeAt(0);
 
         // Start the test if it isn't already running
@@ -51,7 +55,9 @@ export function useEngine({
         }
 
         if (appState.current !== AppState.RUNNING) {
-            sonner("Test not ready");
+            if (appState.current !== AppState.LOADING) {
+                sonner("Test not ready");
+            }
             return;
         }
 
@@ -70,16 +76,17 @@ export function useEngine({
             if (characterTyped.length > 1) return prevUserTyped;
 
             if (characterTypedCode !== lastLetterCode) {
-                toast({
-                    variant: "destructive",
-                    description: `Incorrect letter (${lastLetter})`,
-                });
-
                 if (isAlphanumerical(lastLetter)) {
                     setMissedLetters((prevMissedLetters) => [
                         ...prevMissedLetters,
                         lastLetter,
                     ]);
+                    const current = new Date();
+
+                    setError({
+                        letter: characterTyped,
+                        when: current.getMilliseconds(),
+                    });
                 }
                 return prevUserTyped;
             }
@@ -111,5 +118,6 @@ export function useEngine({
         carrot,
         missedLetters,
         resetTest,
+        error,
     };
 }
