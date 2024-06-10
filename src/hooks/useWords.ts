@@ -2,13 +2,14 @@ import { TestGenerator } from "@/services/testGenerator";
 import { MutableRefObject, useState } from "react";
 import { AppState } from "./useEngine";
 import { toast } from "sonner";
+import { faker } from "@faker-js/faker";
 
 export function useWords({
     appState,
 }: {
     appState: MutableRefObject<AppState>;
 }) {
-    const [words, setWords] = useState("");
+    const [words, setWords] = useState(faker.lorem.words());
 
     function setTestWords(test: Promise<string>) {
         if (appState.current === AppState.LOADING) {
