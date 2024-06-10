@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import TopBar from "@/components/custom/TopBar";
 import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -12,6 +12,7 @@ import { motion } from "framer-motion";
 
 export default function Home() {
     const appState = useRef(AppState.LOADING);
+    const [refresh, setRefresh] = useState(false);
 
     const {
         words,
@@ -33,6 +34,7 @@ export default function Home() {
     useEffect(() => {
         generateNormalTest({ numberOfWords: 50 });
         appState.current = AppState.READY;
+        setRefresh((r) => !r);
     }, []);
 
     useEffect(() => {
@@ -52,7 +54,7 @@ export default function Home() {
                 generateNormalTest={generateNormalTest}
                 timer={timer}
             />
-            <section key={words.length}>
+            <section key={String(refresh)}>
                 <div className="relative mx-auto py-8">
                     {appState.current === AppState.COMPLETED ? (
                         <section className="mx-auto max-w-[80ch]">
