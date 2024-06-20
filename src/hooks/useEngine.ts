@@ -1,4 +1,3 @@
-import { toast } from "@/components/ui/use-toast";
 import { isAlphanumerical } from "@/lib/typing";
 import { MutableRefObject, useRef, useState } from "react";
 import { toast as sonner } from "sonner";
@@ -31,7 +30,7 @@ export function useEngine({
     function scrollIntoView() {
         const { current } = carrot;
         if (current !== null) {
-            current.scrollIntoView({
+            current?.scrollIntoView({
                 behavior: "smooth",
             });
         }
