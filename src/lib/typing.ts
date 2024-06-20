@@ -13,6 +13,9 @@ export function findTypingAccuracy(
     numberOfCharactersTyped: number,
     numberOfCharactersMissed: number
 ) {
+    if (numberOfCharactersTyped <= 0) return 100;
+    if (numberOfCharactersMissed > numberOfCharactersTyped) return 0;
+
     const correctCharacters =
         numberOfCharactersTyped - numberOfCharactersMissed;
 
