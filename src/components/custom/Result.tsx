@@ -3,8 +3,9 @@ import React, { ReactNode, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
 import KeyReport from "./KeyReport";
-import { Crosshair, Gauge, Timer } from "lucide-react";
+import { Crosshair, Gauge, RotateCcw, Timer } from "lucide-react";
 import { Header } from "./Header";
+import { Button } from "../ui/button";
 
 type Report = {
     typingSpeed: number;
@@ -72,10 +73,12 @@ export default function Result({
     typedLetters,
     missedLetters,
     timeTaken,
+    generateNormalTest,
 }: {
     typedLetters: string;
     missedLetters: string[];
     timeTaken: number;
+    generateNormalTest: () => void;
 }) {
     const numberOfCharactersTyped = typedLetters.length;
     const numberOfCharactersMissed = missedLetters.length / 2;
@@ -113,43 +116,54 @@ export default function Result({
     }, []);
 
     return (
-        <section className="grid gap-4">
-            <section className="grid grid-cols-3 gap-4">
-                <Card
-                    heading="Typing speed"
-                    content={report.typingSpeed}
-                    icon={<Gauge size={"1em"} className="my-auto" />}
-                />
-                <Card
-                    heading="Typing accuracy"
-                    content={report.typingAccuracy}
-                    icon={<Crosshair size={"1em"} className="my-auto" />}
-                />
-                <Card
-                    heading="Time taken"
-                    content={report.timeTakenInSeconds}
-                    icon={<Timer size={"1em"} className="my-auto" />}
-                />
-            </section>
-            <Separator />
-            <section className="grid grid-cols-2 gap-4">
-                <LongCard
-                    heading="Characters typed"
-                    content={report.numberOfCharactersTyped}
-                />
-                <LongCard
-                    heading="Characters missed"
-                    content={report.numberOfCharactersMissed}
-                />
-            </section>
-            {report.numberOfCharactersMissed > 0 ? (
-                <>
-                    <Separator />
+        <section className="mx-auto max-w-[80ch]">
+            <section className="grid gap-4">
+                <section className="grid grid-cols-3 gap-4">
+                    <Card
+                        heading="Typing speed"
+                        content={report.typingSpeed}
+                        icon={<Gauge size={"1em"} className="my-auto" />}
+                    />
+                    <Card
+                        heading="Typing accuracy"
+                        content={report.typingAccuracy}
+                        icon={<Crosshair size={"1em"} className="my-auto" />}
+                    />
+                    <Card
+                        heading="Time taken"
+                        content={report.timeTakenInSeconds}
+                        icon={<Timer size={"1em"} className="my-auto" />}
+                    />
+                </section>
+                <Separator />
+                <section className="grid grid-cols-2 gap-4">
+                    <LongCard
+                        heading="Characters typed"
+                        content={report.numberOfCharactersTyped}
+                    />
+                    <LongCard
+                        heading="Characters missed"
+                        content={report.numberOfCharactersMissed}
+                    />
+                </section>
+                {report.numberOfCharactersMissed > 0 ? (
+                    <>
+                        <Separator />
 
-                    <Header>Missed letters</Header>
-                    <KeyReport report={report.charactersReport} />
-                </>
-            ) : null}
+                        <Header>Missed letters</Header>
+                        <KeyReport report={report.charactersReport} />
+                    </>
+                ) : null}
+            </section>
+            <section className="mx-auto mt-8 w-fit">
+                <Button
+                    onClick={() => {
+                        generateNormalTest();
+                    }}>
+                    <RotateCcw className="me-2" size={"1.3em"} />
+                    Restart
+                </Button>
+            </section>
         </section>
     );
 }
