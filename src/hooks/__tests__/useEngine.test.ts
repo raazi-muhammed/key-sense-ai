@@ -1,10 +1,7 @@
-import { renderHook, act } from "@testing-library/react-hooks";
-import { useRef } from "react";
+import { renderHook, act } from "@testing-library/react";
 import { describe, expect, beforeEach, test, jest } from "@jest/globals";
 import { AppState, useEngine } from "../useEngine";
-import { toast as sonner } from "sonner";
 
-// Mocking the sonner function
 jest.mock("sonner", () => jest.fn());
 
 describe("useEngine", () => {
