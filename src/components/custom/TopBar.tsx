@@ -1,4 +1,9 @@
-import React, { MutableRefObject, useEffect, useState } from "react";
+import React, {
+    MutableRefObject,
+    SyntheticEvent,
+    useEffect,
+    useState,
+} from "react";
 import { Input } from "../ui/input";
 import { TypingMode, useStore } from "@/store/store";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -31,10 +36,9 @@ export default function TopBar({
     appState: MutableRefObject<AppState>;
     generateTestFromTopic: (params: { topic: string }) => void;
     generateTestFromMissed: (params: { letters: string[] }) => void;
-    generateNormalTest: (params: { numberOfWords: number }) => void;
+    generateNormalTest: () => void;
 }) {
     const [topic, setTopic] = useState("Touch typing");
-    const [numberOfWords, setNumberOfWords] = useState<number | undefined>(50);
     const { typingMode, setTypingMode } = useStore();
     const [missedLetters, setMissedLetters] = useState<{ letter: string }[]>(
         []
@@ -44,6 +48,17 @@ export default function TopBar({
             setMissedLetters(res.data.report);
         });
     }, []);
+    const { setNoOfWords, settings } = useStore();
+    const numberOfWords = settings.noOfWords;
+
+    function handleNumberOfWordsChange(e: React.ChangeEvent<HTMLInputElement>) {
+        if (e.target.value == "") {
+            return;
+        }
+        const number = Number(e.target.value);
+        if (isNaN(number)) return;
+        setNoOfWords(number);
+    }
 
     return (
         <section className="flex h-[30svh] flex-col justify-between bg-secondary py-8">
@@ -85,29 +100,10 @@ export default function TopBar({
                                     else appState.current = AppState.READY;
                                 }}
                                 value={numberOfWords}
-                                onChange={(e) => {
-                                    if (e.target.value == "") {
-                                        setNumberOfWords(undefined);
-                                        return;
-                                    }
-                                    const number = Number(e.target.value);
-                                    if (isNaN(number)) return;
-                                    if (number > 0 && number < 100) {
-                                        setNumberOfWords(number);
-                                    } else {
-                                        toast({
-                                            variant: "destructive",
-                                            description: "Invalid number",
-                                        });
-                                    }
-                                }}
+                                onChange={handleNumberOfWordsChange}
                             />
                             <GenerateButton
-                                onClick={() =>
-                                    generateNormalTest({
-                                        numberOfWords: numberOfWords || 5,
-                                    })
-                                }
+                                onClick={() => generateNormalTest()}
                             />
                         </div>
                     </TabsContent>

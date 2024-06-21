@@ -32,7 +32,7 @@ export default function Home() {
     } = useEngine({ words, appState });
 
     useEffect(() => {
-        generateNormalTest({ numberOfWords: 50 });
+        generateNormalTest();
         appState.current = AppState.READY;
         setRefresh((r) => !r);
     }, []);
@@ -66,9 +66,7 @@ export default function Home() {
                             <section className="mx-auto mt-4 w-fit">
                                 <Button
                                     onClick={() => {
-                                        generateNormalTest({
-                                            numberOfWords: 50,
-                                        });
+                                        generateNormalTest();
                                     }}>
                                     Restart
                                 </Button>

@@ -3,12 +3,15 @@ import { faker } from "@faker-js/faker";
 import axios from "axios";
 
 export class TestGenerator {
-    constructor() {}
+    numberOfWords: number;
+    constructor(numberOfWords: number) {
+        this.numberOfWords = numberOfWords;
+    }
 
     async topicTest(topic: string): Promise<string> {
         return axios
             .post(
-                `/api/tests/generate?type=${TypingMode.AI_TOPIC_GENERATION}`,
+                `/api/tests/generate?type=${TypingMode.AI_TOPIC_GENERATION}&noOfWords=${this.numberOfWords}`,
                 { topic }
             )
             .then((res) => res.data.response);
@@ -16,14 +19,14 @@ export class TestGenerator {
     async missedTest(letters: string[]): Promise<string> {
         return axios
             .post(
-                `/api/tests/generate?type=${TypingMode.AI_MISSED_LETTER_GENERATION}`,
+                `/api/tests/generate?type=${TypingMode.AI_MISSED_LETTER_GENERATION}&noOfWords=${this.numberOfWords}`,
                 { letters }
             )
             .then((res) => res.data.response);
     }
 
-    async normalTest(numberOfWords: number): Promise<string> {
-        const words = faker.lorem.words(numberOfWords);
+    async normalTest(): Promise<string> {
+        const words = faker.lorem.words(this.numberOfWords);
         return words;
     }
 }

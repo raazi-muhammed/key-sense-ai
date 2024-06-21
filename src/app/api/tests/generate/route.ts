@@ -6,6 +6,15 @@ import { GoogleGenerativeAI } from "@google/generative-ai";
 import { getToken } from "next-auth/jwt";
 import { NextRequest, NextResponse } from "next/server";
 
+function validateNumberOfWords(num: string | null) {
+    if (!num) return 15;
+
+    const number = Number(num);
+    if (number < 10) throw new ErrorHandler("Number of words too low", 400);
+    if (number > 100) throw new ErrorHandler("Number of words too high", 400);
+    return number;
+}
+
 export const POST = AsyncCallback(async (request: NextRequest) => {
     const data = await request.json();
 
@@ -19,6 +28,9 @@ export const POST = AsyncCallback(async (request: NextRequest) => {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get("type");
 
+    const noOfWordsQuery = searchParams.get("noOfWords");
+    const noOfWords = validateNumberOfWords(noOfWordsQuery);
+
     const genAI = new GoogleGenerativeAI(
         process.env.GOOGLE_GEMINI_API_KEY || ""
     );
@@ -30,9 +42,9 @@ export const POST = AsyncCallback(async (request: NextRequest) => {
     if (query == TypingMode.AI_MISSED_LETTER_GENERATION) {
         prompt = `create a dummy paragraph, add a lot of words with these letters ${data.letters.join(
             ","
-        )}, there should not be any formatting, and it should about 50 words, use simple english`;
+        )}, there should not be any formatting, and it should about ${noOfWords} words, use simple english`;
     } else {
-        prompt = `tell me about ${data.topic}, there should not be any formatting, and it should about 50 words, use simple english`;
+        prompt = `tell me about ${data.topic}, there should not be any formatting, and it should about ${noOfWords} words, use simple english`;
     }
 
     const result = await model.generateContent(prompt);

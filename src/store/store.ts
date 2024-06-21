@@ -11,6 +11,10 @@ type Store = {
     isRunning: boolean;
     setTypingMode: (topic: TypingMode) => void;
     setIsRunning: (running: boolean) => void;
+    settings: {
+        noOfWords: number;
+    };
+    setNoOfWords: (noOfWords: number) => void;
 };
 
 export const useStore = create<Store>()((set) => ({
@@ -18,4 +22,8 @@ export const useStore = create<Store>()((set) => ({
     isRunning: false,
     setTypingMode: (topic: TypingMode) => set({ typingMode: topic }),
     setIsRunning: (running: boolean) => set({ isRunning: running }),
+    settings: {
+        noOfWords: 15,
+    },
+    setNoOfWords: (noOfWords: number) => set({ settings: { noOfWords } }),
 }));

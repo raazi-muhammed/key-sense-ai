@@ -3,6 +3,7 @@ import { MutableRefObject, useState } from "react";
 import { AppState } from "./useEngine";
 import { toast } from "sonner";
 import { faker } from "@faker-js/faker";
+import { useStore } from "@/store/store";
 
 export function useWords({
     appState,
@@ -10,6 +11,7 @@ export function useWords({
     appState: MutableRefObject<AppState>;
 }) {
     const [words, setWords] = useState(faker.lorem.words(50));
+    const { settings } = useStore();
 
     function setTestWords(test: Promise<string>) {
         if (appState.current === AppState.LOADING) {
@@ -32,18 +34,18 @@ export function useWords({
             });
     }
 
-    function generateNormalTest({ numberOfWords }: { numberOfWords: number }) {
-        const generator = new TestGenerator();
-        setTestWords(generator.normalTest(numberOfWords));
+    function generateNormalTest() {
+        const generator = new TestGenerator(settings.noOfWords);
+        setTestWords(generator.normalTest());
     }
 
     function generateTestFromTopic({ topic }: { topic: string }) {
-        const generator = new TestGenerator();
+        const generator = new TestGenerator(settings.noOfWords);
         setTestWords(generator.topicTest(topic));
     }
 
     function generateTestFromMissed({ letters }: { letters: string[] }) {
-        const generator = new TestGenerator();
+        const generator = new TestGenerator(settings.noOfWords);
         setTestWords(generator.missedTest(letters));
     }
 
