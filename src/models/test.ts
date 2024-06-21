@@ -1,4 +1,4 @@
-import mongoose, { Schema, models } from "mongoose";
+import mongoose, { HydratedDocument, Model, Schema, models } from "mongoose";
 
 const testSchema = new Schema(
     {

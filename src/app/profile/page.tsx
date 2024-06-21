@@ -28,6 +28,8 @@ import {
 } from "@/components/ui/pagination";
 import KeyReport from "@/components/custom/KeyReport";
 import { Header } from "@/components/custom/Header";
+import { DataTable } from "./data-table";
+import { columns } from "./columns";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -95,7 +97,7 @@ export default async function Profile({
     });
 
     return (
-        <main className="container space-y-4">
+        <main className="container space-y-4 pb-24">
             <section className="mt-8 flex gap-4">
                 <Link href="/">
                     <Button variant="secondary">
@@ -118,83 +120,12 @@ export default async function Profile({
             <Header>Missed</Header>
             <KeyReport report={report} />
             <Header>Tests</Header>
-            {tests.length ? (
-                <>
-                    <Table>
-                        <TableHeader>
-                            <TableRow>
-                                <TableHead>Date</TableHead>
-                                <TableHead>Speed</TableHead>
-                                <TableHead>Accuracy</TableHead>
-                                <TableHead>Time taken</TableHead>
-                            </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                            {tests.map((test, index) => (
-                                <TableRow key={index}>
-                                    <TableCell>
-                                        {moment(test.createdAt).format("LLL")}
-                                    </TableCell>
-                                    <TableCell>
-                                        {test.typingSpeed} WPM
-                                    </TableCell>
-                                    <TableCell>
-                                        {test.typingAccuracy}%
-                                    </TableCell>
-                                    <TableCell>
-                                        {test.timeTakenInSeconds}s
-                                    </TableCell>
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                    <Pagination className="pb-8">
-                        <PaginationContent>
-                            <PaginationItem>
-                                <PaginationPrevious
-                                    href={`profile?page=${
-                                        pageNumber - 1 > 0
-                                            ? pageNumber - 1
-                                            : pageNumber
-                                    }`}
-                                />
-                            </PaginationItem>
-                            <div className="flex max-w-96 overflow-auto">
-                                {Array(pagination.noOfPages)
-                                    .fill(0)
-                                    .map((i, index) => {
-                                        let rearrangedIndex = index + 1;
-                                        return (
-                                            <PaginationItem key={pageNumber}>
-                                                <PaginationLink
-                                                    className={
-                                                        rearrangedIndex ==
-                                                        pageNumber
-                                                            ? "bg-muted"
-                                                            : ""
-                                                    }
-                                                    href={`profile?page=${rearrangedIndex}`}>
-                                                    {rearrangedIndex}
-                                                </PaginationLink>
-                                            </PaginationItem>
-                                        );
-                                    })}
-                            </div>
-                            <PaginationItem>
-                                <PaginationNext
-                                    href={`profile?page=${
-                                        pageNumber + 1 < pagination.noOfPages
-                                            ? pageNumber + 1
-                                            : pageNumber
-                                    }`}
-                                />
-                            </PaginationItem>
-                        </PaginationContent>
-                    </Pagination>
-                </>
-            ) : (
-                <p className="text-white/50">No tests found</p>
-            )}
+            <DataTable
+                columns={columns}
+                data={tests}
+                pageCount={pagination.noOfPages}
+                pageIndex={pageNumber}
+            />
         </main>
     );
 }
