@@ -9,6 +9,7 @@ import Result from "@/components/custom/Result";
 import { useWords } from "@/hooks/useWords";
 import { AppState, useEngine } from "@/hooks/useEngine";
 import { motion } from "framer-motion";
+import { RotateCcw } from "lucide-react";
 
 export default function Home() {
     const appState = useRef(AppState.LOADING);
@@ -63,11 +64,15 @@ export default function Home() {
                                 missedLetters={missedLetters}
                                 timeTaken={timer}
                             />
-                            <section className="mx-auto mt-4 w-fit">
+                            <section className="mx-auto mt-8 w-fit">
                                 <Button
                                     onClick={() => {
                                         generateNormalTest();
                                     }}>
+                                    <RotateCcw
+                                        className="me-2"
+                                        size={"1.3em"}
+                                    />
                                     Restart
                                 </Button>
                             </section>

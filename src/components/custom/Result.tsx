@@ -1,7 +1,10 @@
 import { findTypingAccuracy, findTypingSpeed } from "@/lib/typing";
-import React, { useEffect } from "react";
+import React, { ReactNode, useEffect } from "react";
 import { Separator } from "@/components/ui/separator";
 import axios from "axios";
+import KeyReport from "./KeyReport";
+import { Crosshair, Gauge, Timer } from "lucide-react";
+import { Header } from "./Header";
 
 type Report = {
     typingSpeed: number;
@@ -23,6 +26,8 @@ function generateLettersReport({
     missedLetters: string[];
     typedLetters: string[];
 }) {
+    console.log({ missedLetters, typedLetters });
+
     const lettersEvaluation = new Map();
     typedLetters.forEach((letter) => {
         if (lettersEvaluation.has(letter)) {
@@ -59,7 +64,8 @@ function generateLettersReport({
     lettersEvaluation.forEach((val, key) => {
         items.push({ letter: key, ...val });
     });
-    return items;
+
+    return items.filter((l) => l.missedCount > 0);
 }
 
 export default function Result({
@@ -109,14 +115,20 @@ export default function Result({
     return (
         <section className="grid gap-4">
             <section className="grid grid-cols-3 gap-4">
-                <Card heading="Typing speed" content={report.typingSpeed} />
+                <Card
+                    heading="Typing speed"
+                    content={report.typingSpeed}
+                    icon={<Gauge size={"1em"} className="my-auto" />}
+                />
                 <Card
                     heading="Typing accuracy"
                     content={report.typingAccuracy}
+                    icon={<Crosshair size={"1em"} className="my-auto" />}
                 />
                 <Card
                     heading="Time taken"
                     content={report.timeTakenInSeconds}
+                    icon={<Timer size={"1em"} className="my-auto" />}
                 />
             </section>
             <Separator />
@@ -133,16 +145,9 @@ export default function Result({
             {report.numberOfCharactersMissed > 0 ? (
                 <>
                     <Separator />
-                    <p>Missed letters</p>
-                    <section className="grid grid-cols-3 gap-4 rounded bg-secondary p-4">
-                        {report.charactersReport.map((letter) => (
-                            <LongCard
-                                key={letter.letter}
-                                heading={letter.letter}
-                                content={letter.missedCount}
-                            />
-                        ))}
-                    </section>
+
+                    <Header>Missed letters</Header>
+                    <KeyReport report={report.charactersReport} />
                 </>
             ) : null}
         </section>
@@ -152,14 +157,19 @@ export default function Result({
 function Card({
     heading,
     content,
+    icon,
 }: {
     heading: string;
     content: string | number;
+    icon: ReactNode;
 }) {
     return (
         <section className="rounded border bg-card p-4">
-            <p className="">{heading}</p>
-            <p className="text-lg">{content}</p>
+            <div className="flex gap-2 align-middle text-muted-foreground">
+                {icon}
+                <p className="">{heading}</p>
+            </div>
+            <p className="font-mono text-lg">{content}</p>
         </section>
     );
 }
@@ -171,9 +181,9 @@ function LongCard({
     content: string | number;
 }) {
     return (
-        <section className="flex justify-between rounded border bg-card p-4">
-            <p className="">{heading}</p>
-            <p className="text-lg">{content}</p>
+        <section className="flex justify-between rounded p-2">
+            <p className="text-sm">{heading}</p>
+            <p className="font-mono text-sm">{content}</p>
         </section>
     );
 }

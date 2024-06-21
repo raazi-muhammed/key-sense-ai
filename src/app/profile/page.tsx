@@ -26,6 +26,8 @@ import {
     PaginationNext,
     PaginationPrevious,
 } from "@/components/ui/pagination";
+import KeyReport from "@/components/custom/KeyReport";
+import { Header } from "@/components/custom/Header";
 
 const ITEMS_PER_PAGE = 10;
 
@@ -53,7 +55,7 @@ async function getReports(
     const formattedReport = [];
     for (let i = 0; i < report?.lettersReport?.length; i++) {
         const current = report.lettersReport[i];
-        if (current)
+        if (current && current.missedCount > 0)
             formattedReport.push({
                 letter: String.fromCharCode(i),
                 typedCount: current.typedCount,
@@ -114,30 +116,7 @@ export default async function Profile({
             </section>
 
             <Header>Missed</Header>
-            {report.length > 0 ? (
-                <section className="container mx-auto flex w-fit flex-wrap justify-center gap-1">
-                    {report.map((letter) => (
-                        <Card
-                            key={letter.letter}
-                            className="relative aspect-square w-14 place-items-center p-2 font-mono">
-                            <p className="m-0 ms-1 text-lg">
-                                {letter.letter.toUpperCase()}
-                            </p>
-                            <small className="absolute bottom-2 right-2">
-                                {Math.floor(
-                                    (letter.missedCount / letter.typedCount) *
-                                        100
-                                )}
-                                %
-                            </small>
-                        </Card>
-                    ))}
-                </section>
-            ) : (
-                <p className="text-white/50">
-                    Not enough tests to generate report
-                </p>
-            )}
+            <KeyReport report={report} />
             <Header>Tests</Header>
             {tests.length ? (
                 <>
@@ -218,8 +197,4 @@ export default async function Profile({
             )}
         </main>
     );
-}
-
-function Header({ children }: { children: string }) {
-    return <h3 className="font-mono text-2xl font-bold">{children}</h3>;
 }
