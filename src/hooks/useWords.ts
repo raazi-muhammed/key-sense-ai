@@ -10,8 +10,8 @@ export function useWords({
 }: {
     appState: MutableRefObject<AppState>;
 }) {
-    const [words, setWords] = useState(faker.lorem.words(50));
     const { settings } = useStore();
+    const [words, setWords] = useState(faker.lorem.words(settings.noOfWords));
 
     function setTestWords(test: Promise<string>) {
         if (appState.current === AppState.LOADING) {
