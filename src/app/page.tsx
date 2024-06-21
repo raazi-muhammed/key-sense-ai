@@ -8,6 +8,7 @@ import { AppState, useEngine } from "@/hooks/useEngine";
 import Loading from "./loading";
 import React from "react";
 import TypingTest from "@/components/custom/TypingTest";
+import ErrorState from "./error";
 
 export default function Home() {
     const appState = useRef(AppState.LOADING);
@@ -78,13 +79,5 @@ export default function Home() {
                 </div>
             </section>
         </main>
-    );
-}
-
-export function ErrorState() {
-    return (
-        <p className="text-center text-muted-foreground">
-            An error occurred, try regenerating the test
-        </p>
     );
 }
