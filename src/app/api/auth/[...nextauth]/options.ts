@@ -1,53 +1,34 @@
 import { connectDB } from "@/lib/database";
 import User from "@/models/user";
 import { NextAuthOptions } from "next-auth";
-import CredentialsProvider from "next-auth/providers/credentials";
-import bcrypt from "bcryptjs";
+import GoogleProvider from "next-auth/providers/google";
+import GitHubProvider from "next-auth/providers/github";
 
 export const options: NextAuthOptions = {
     providers: [
-        CredentialsProvider({
-            name: "Credentials",
-            credentials: {
-                email: {
-                    label: "email",
-                    type: "text",
-                    placeholder: "email",
-                },
-                password: {
-                    label: "password",
-                    type: "password",
-                },
-            },
-            async authorize(credentials: any) {
-                try {
-                    await connectDB();
-                    const user = await User.findOne({
-                        email: credentials?.email,
-                    });
-
-                    if (!user) {
-                        throw new Error("No user found");
-                    }
-
-                    const isPasswordCorrect = await bcrypt.compare(
-                        credentials?.password,
-                        user.password
-                    );
-                    console.log({ user, isPasswordCorrect, credentials });
-
-                    if (!isPasswordCorrect) {
-                        throw new Error("Invalid password");
-                    }
-
-                    return user;
-                } catch (error: any) {
-                    throw new Error(error);
-                }
-            },
+        GoogleProvider({
+            clientId: String(process.env.GOOGLE_CLIENT_ID),
+            clientSecret: String(process.env.GOOGLE_CLIENT_SECRET),
+        }),
+        GitHubProvider({
+            clientId: String(process.env.GITHUB_ID),
+            clientSecret: String(process.env.GITHUB_SECRET),
         }),
     ],
+    callbacks: {
+        async signIn({ user, account }) {
+            await connectDB();
+
+            const alreadyUser = await User.findOne({ email: user.email });
+
+            if (alreadyUser) {
+                return true;
+            }
+            await User.create({ ...user, account: account?.provider });
+            return true;
+        },
+    },
     pages: {
-        signIn: "/login",
+        signIn: "/sign-in",
     },
 };

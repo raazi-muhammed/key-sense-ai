@@ -34,7 +34,9 @@ async function getReports(
     pagination: { page: number }
 ) {
     connectDB();
+    console.log({ userEmail });
     const user = await User.findOne({ email: userEmail });
+
     if (!user) throw new Error("no usr found");
 
     const tests = await Test.find({ user: user._id })
@@ -137,7 +139,7 @@ export default async function Profile({
                 </p>
             )}
             <Header>Tests</Header>
-            {true ? (
+            {tests.length ? (
                 <>
                     <Table>
                         <TableHeader>
