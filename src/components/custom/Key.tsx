@@ -17,7 +17,7 @@ export default function Key({ code }: { code: number }) {
                 variants={key}
                 initial="hidden"
                 animate="show"
-                className="mx-[1px] my-1 grid h-10 w-8 max-w-full rounded-[.25em] border border-slate-700">
+                className="mx-[1px] my-1 grid h-10 w-8 max-w-full rounded-[.25em]">
                 <CornerDownLeft className="m-auto" />
             </motion.span>
             <div className="w-full"></div>
@@ -27,7 +27,7 @@ export default function Key({ code }: { code: number }) {
             variants={key}
             initial="hidden"
             animate="show"
-            className="mx-[1px] my-1 h-10 w-6 rounded-[.25em] border border-slate-700 bg-background">
+            className="mx-[1px] my-1 h-10 w-6 rounded-[.25em] bg-secondary">
             {String.fromCharCode(code)}
         </motion.span>
     );
