@@ -33,21 +33,11 @@ export default function TypingTest({
                                 |
                             </span>
                             {!!error && (
-                                <motion.span
-                                    key={`${error.when.toString()}-${
-                                        error.letter
-                                    }`}
-                                    animate={{
-                                        opacity: [0, 1, 0],
-                                        y: [0, 0, 20],
-                                        scale: [0.5, 1, 1],
-                                    }}
-                                    transition={{
-                                        duration: 0.7,
-                                    }}
-                                    className="my-1 -ms-2 block h-10 w-6 rounded-[.25em] border border-red-700 bg-red-950 text-red-500">
-                                    {error?.letter}
-                                </motion.span>
+                                <Key
+                                    variant="error"
+                                    key={error.when.toString()}
+                                    code={error.letter.charCodeAt(0)}
+                                />
                             )}
                         </div>
                     </p>
